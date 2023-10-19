@@ -1,22 +1,22 @@
-NAME = "ObjectListView2"
+NAME = "ObjectListView3"
 # update following in conf.py, __init__.py and here
-VERSION = "1.0.1"
-URL = "https://github.com/eriknystrom/ObjectListView2"
-DOWNLOAD_URL = "https://github.com/eriknystrom/ObjectListView2/releases"
+VERSION = "1.3.2"
+URL = "https://github.com/driscollis/ObjectListView3"
+DOWNLOAD_URL = "https://github.com/driscollis/ObjectListView3/releases"
 LICENSE = "wxWindows"
 AUTHOR = "Phillip Piper"
 AUTHOR_EMAIL = "phillip.piper@gmail.com"
-MAINTAINER = "Erik Nystrom"
-MAINTAINER_EMAIL = "Erik.Nystrom87@gmail.com"
-YEAR = 2019
-DESCRIPTION = "An ObjectListView is a wrapper around the wx.ListCtrl that makes the list control easier to use. This is an upload of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/"
+MAINTAINER = "Mike Driscoll"
+MAINTAINER_EMAIL = "mike@pythonlibrary.org"
+YEAR = 2023
+DESCRIPTION = "An ObjectListView is a wrapper around the wx.ListCtrl that makes the list control easier to use. This is a fork of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/"
 
 LONG_DESCRIPTION = \
     r"""
     ObjectListView
     ==============
     
-    This is an upload of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/ 
+    This is an fork of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/ 
     
     An ObjectListView is a wrapper around the wx.ListCtrl that makes the
     list control easier to use. It also provides some useful extra functionality.
@@ -41,11 +41,11 @@ LONG_DESCRIPTION = \
     Seriously, after using an ObjectListView, you will never go back to using a plain wx.ListCtrl.
     
     
-    Dependancies
+    Dependencies
     ============
     
-      * Python 2.7+
-      * wxPython 2.8+
+      * Python 3.8+
+      * wxPython 4+
     
     """
 CLASSIFIERS = [
