@@ -1,8 +1,6 @@
-ObjectListView3
-==============
+# ObjectListView3
 
-This is an upload of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/src/default/ 
-
+This is a fork of olv 1.3.2 from https://bitbucket.org/wbruhin/objectlistview/src/default/ 
 
 
 *An ObjectListView is a wrapper around the wx.ListCtrl that makes the
@@ -17,8 +15,7 @@ ObjectListView encourages the vices of sloth and hubris, by allowing programmers
 less work but still produce great looking results.
 
 
-Without wasting my time, just tell me what it does!
----------------------------------------------------
+## Without wasting my time, just tell me what it does!
 
 OK, here's the bullet point feature list:
 
@@ -41,25 +38,15 @@ OK, here's the bullet point feature list:
 Seriously, after using an ObjectListView, you will never go back to using a plain wx.ListCtrl.
 
 
-OK, I'm interested. What do I do next?
---------------------------------------
+## OK, I'm interested. What do I do next?
+
 
 As Phillip has not updated the Python version for a long time I created this fork as I want to
 use it with wxPython 2.9+ and wxPython 3.x Phoenix on both Python 2.x and 3.x.
 
-To install this version clone the repo or download it and then run `setup.py install`.
+To install this version, you can run the following command:
 
-Cloning using ssh::
+```
+python -m pip install git+https://github.com/driscollis/ObjectListView3.git
+```
 
- hg clone ssh://hg@bitbucket.org/wbruhin/objectlistview
-
-Cloning using https::
-
-  hg clone https://wbruhin@bitbucket.org/wbruhin/objectlistview
-
-
-The original project was hosted on `SourceForge <https://sourceforge.net/project/showfiles.php?group_id=225207&package_id=280564>`_.
-
-
-
-TODO: Update readme
