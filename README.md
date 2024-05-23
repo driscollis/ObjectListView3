@@ -47,6 +47,6 @@ use it with wxPython 2.9+ and wxPython 3.x Phoenix on both Python 2.x and 3.x.
 To install this version, you can run the following command:
 
 ```
-python -m pip install git+https://github.com/driscollis/ObjectListView3.git
+python -m pip install ObjectListView3
 ```
 
