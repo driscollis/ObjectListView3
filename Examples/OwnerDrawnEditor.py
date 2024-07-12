@@ -23,12 +23,7 @@ the colour's name on a background of that colour.
 """
 
 import wx
-if 'phoenix' in wx.PlatformInfo:
-    from wx.adv import OwnerDrawnComboBox
-    cbFlags = wx.adv
-else:
-    from wx.combo import OwnerDrawnComboBox
-    cbFlags = wx.combo
+from wx.adv import OwnerDrawnComboBox
 import wx.lib.colourdb
 
 class Bucket:
@@ -98,10 +93,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
         # Measuring text has to be done after the control is initialized
         measuringDC = wx.ClientDC(self)
         for x in self.fontInfo:
-            if 'phoenix' in wx.PlatformInfo:
-                x.font = wx.FFont(self.fontHeight, wx.FONTFAMILY_DEFAULT, faceName=x.name)
-            else:
-                x.font = wx.FFont(self.fontHeight, wx.FONTFAMILY_DEFAULT, face=x.name)
+            x.font = wx.FFont(self.fontHeight, wx.FONTFAMILY_DEFAULT, faceName=x.name)
             x.extent = measuringDC.GetFullTextExtent(x.display, font=x.font)
 
     def SetValue(self, value):
@@ -118,12 +110,9 @@ class FontFaceComboBox(OwnerDrawnComboBox):
             return
 
         bucket = self.fontInfo[item]
-        if (flags & cbFlags.ODCB_PAINTING_CONTROL) == cbFlags.ODCB_PAINTING_CONTROL:
+        if (flags & wx.adv.ODCB_PAINTING_CONTROL) == wx.adv.ODCB_PAINTING_CONTROL:
             fontSize = min(self.fontHeight, max(10, self.GetSize().GetHeight() - 9))
-            if 'phoenix' in wx.PlatformInfo:
-                dc.SetFont(wx.FFont(fontSize, wx.FONTFAMILY_DEFAULT, faceName=bucket.name))
-            else:
-                dc.SetFont(wx.FFont(fontSize, wx.FONTFAMILY_DEFAULT, face=bucket.name))
+            dc.SetFont(wx.FFont(fontSize, wx.FONTFAMILY_DEFAULT, faceName=bucket.name))
             display = bucket.name
         else:
             dc.SetFont(bucket.font)
@@ -133,7 +122,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
     def OnDrawBackground(self, dc, rect, item, flags):
         # If the item is selected, or we are painting the combo control itself, then use
         # the default rendering.
-        if flags & (cbFlags.ODCB_PAINTING_CONTROL | cbFlags.ODCB_PAINTING_SELECTED):
+        if flags & (wx.adv.ODCB_PAINTING_CONTROL | wx.adv.ODCB_PAINTING_SELECTED):
             OwnerDrawnComboBox.OnDrawBackground(self, dc, rect, item, flags)
             return
 
@@ -144,10 +133,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
             backColour = self.evenRowBackground
         dc.SetBrush(wx.Brush(backColour))
         dc.SetPen(wx.Pen(backColour))
-        if 'phoenix' in wx.PlatformInfo:
-            dc.DrawRectangle(rect)
-        else:
-            dc.DrawRectangleRect(rect)
+        dc.DrawRectangle(rect)
 
     def OnMeasureItem(self, item):
         (width, height, descent, externalLeading) = self.fontInfo[item].extent
@@ -222,11 +208,8 @@ class ColourComboBox(OwnerDrawnComboBox):
 
         bucket = self.colourList[item]
 
-        if flags & cbFlags.ODCB_PAINTING_SELECTED:
-            if 'phoenix' in wx.PlatformInfo:
-                dc.DrawRectangle(rect)
-            else:
-                dc.DrawRectangleRect(rect)
+        if flags & wx.adv.ODCB_PAINTING_SELECTED:
+            dc.DrawRectangle(rect)
         else:
             if bucket.intensity > (255+255+255)*2/3:
                 dc.SetTextForeground(wx.BLACK)
@@ -238,16 +221,13 @@ class ColourComboBox(OwnerDrawnComboBox):
     def OnDrawBackground(self, dc, rect, item, flags):
         # If the item is selected, then use the default rendering.
         # Otherwise, draw each row with its own colour as the background
-        if flags & cbFlags.ODCB_PAINTING_SELECTED:
+        if flags & wx.adv.ODCB_PAINTING_SELECTED:
             OwnerDrawnComboBox.OnDrawBackground(self, dc, rect, item, flags)
         else:
             backColour = self.colourList[item].colour
             dc.SetBrush(wx.Brush(backColour))
             dc.SetPen(wx.Pen(backColour))
-            if 'phoenix' in wx.PlatformInfo:
-                dc.DrawRectangle(rect)
-            else:
-                dc.DrawRectangleRect(rect)
+            dc.DrawRectangle(rect)
 
     def OnMeasureItem(self, item):
         return self.popupRowHeight

@@ -355,36 +355,20 @@ class ObjectListView(wx.ListCtrl):
 
         info = wx.ListItem()
 
-        if 'phoenix' in wx.PlatformInfo:
-            info.Mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
-            if isinstance(
-                    defn.headerImage,
-                    str) and self.smallImageList is not None:
-                info.Image = self.smallImageList.GetImageIndex(
-                    defn.headerImage)
-            else:
-                info.Image = defn.headerImage
-            if info.Image != -1:
-                info.Mask = info.Mask | wx.LIST_MASK_IMAGE
-            info.Align = defn.GetAlignment()
-            info.Text = defn.title
-            info.Width = defn.width
-            self.InsertColumn(len(self.columns) - 1, info)
+        info.Mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
+        if isinstance(
+                defn.headerImage,
+                six.string_types) and self.smallImageList is not None:
+            info.Image = self.smallImageList.GetImageIndex(
+                defn.headerImage)
         else:
-            info.m_mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
-            if isinstance(
-                    defn.headerImage,
-                    str) and self.smallImageList is not None:
-                info.m_image = self.smallImageList.GetImageIndex(
-                    defn.headerImage)
-            else:
-                info.m_image = defn.headerImage
-            if info.m_image != -1:
-                info.m_mask = info.m_mask | wx.LIST_MASK_IMAGE
-            info.m_format = defn.GetAlignment()
-            info.m_text = defn.title
-            info.m_width = defn.width
-            self.InsertColumnInfo(len(self.columns) - 1, info)
+            info.Image = defn.headerImage
+        if info.Image != -1:
+            info.Mask = info.Mask | wx.LIST_MASK_IMAGE
+        info.Align = defn.GetAlignment()
+        info.Text = defn.title
+        info.Width = defn.width
+        self.InsertColumn(len(self.columns) - 1, info)
 
         # Under Linux, the width doesn't take effect without this call
         self.SetColumnWidth(len(self.columns) - 1, defn.width)
@@ -399,10 +383,7 @@ class ObjectListView(wx.ListCtrl):
         Initialize some checkbox images for use by this control.
         """
         def _makeBitmap(state, size):
-            if 'phoenix' in wx.PlatformInfo:
-                bitmap = wx.Bitmap(size, size)
-            else:
-                bitmap = wx.EmptyBitmap(size, size)
+            bitmap = wx.Bitmap(size, size)
             dc = wx.MemoryDC(bitmap)
             dc.Clear()
 
@@ -595,16 +576,10 @@ class ObjectListView(wx.ListCtrl):
         # There must always be the same number of small and normal bitmaps,
         # so if we aren't given one, we have to make an empty one of the right
         # size
-        if 'phoenix' in wx.PlatformInfo:
-            smallImage = smallImage or wx.Bitmap(
-                *self.smallImageList.GetSize(0))
-            normalImage = normalImage or wx.Bitmap(
-                *self.normalImageList.GetSize(0))
-        else:
-            smallImage = smallImage or wx.EmptyBitmap(
-                *self.smallImageList.GetSize(0))
-            normalImage = normalImage or wx.EmptyBitmap(
-                *self.normalImageList.GetSize(0))
+        smallImage = smallImage or wx.Bitmap(
+            *self.smallImageList.GetSize(0))
+        normalImage = normalImage or wx.Bitmap(
+            *self.normalImageList.GetSize(0))
 
         self.smallImageList.AddNamedImage(name, smallImage)
         return self.normalImageList.AddNamedImage(name, normalImage)
@@ -837,16 +812,10 @@ class ObjectListView(wx.ListCtrl):
             self.SetItem(listItem)
 
         for iCol in range(1, len(self.columns)):
-            if 'phoenix' in wx.PlatformInfo:
-                self.SetItem(
-                    index, iCol, self.GetStringValueAt(
-                        modelObject, iCol), self.GetImageAt(
-                        modelObject, iCol))
-            else:
-                self.SetStringItem(
-                    index, iCol, self.GetStringValueAt(
-                        modelObject, iCol), self.GetImageAt(
-                        modelObject, iCol))
+            self.SetItem(
+                index, iCol, self.GetStringValueAt(
+                    modelObject, iCol), self.GetImageAt(
+                    modelObject, iCol))
 
     def RefreshObject(self, modelObject):
         """
@@ -922,10 +891,7 @@ class ObjectListView(wx.ListCtrl):
         # else:
         #    clientSize = self.GetClientSizeTuple()[0]
         #freeSpace = max(0, clientSize - totalFixedWidth)
-        if 'phoenix' in wx.PlatformInfo:
-            freeSpace = max(0, self.GetClientSize()[0] - totalFixedWidth)
-        else:
-            freeSpace = max(0, self.GetClientSizeTuple()[0] - totalFixedWidth)
+        freeSpace = max(0, self.GetClientSize()[0] - totalFixedWidth)
 
         # Calculate the total number of slices the free space will be divided
         # into
@@ -1764,14 +1730,9 @@ class ObjectListView(wx.ListCtrl):
         self._ResizeSpaceFillingColumns()
         # Make sure our empty msg is reasonably positioned
         sz = self.GetClientSize()
-        if 'phoenix' in wx.PlatformInfo:
-            self.stEmptyListMsg.SetSize(0, sz.GetHeight() // 3,
-                                        sz.GetWidth(),
-                                        sz.GetHeight())
-        else:
-            self.stEmptyListMsg.SetDimensions(0, sz.GetHeight() // 3,
-                                              sz.GetWidth(),
-                                              sz.GetHeight())
+        self.stEmptyListMsg.SetSize(0, sz.GetHeight() // 3,
+                                    sz.GetWidth(),
+                                    sz.GetHeight())
         # self.stEmptyListMsg.Wrap(sz.GetWidth())
 
     def _HandleTabKey(self, isShiftDown):
@@ -2044,10 +2005,7 @@ class ObjectListView(wx.ListCtrl):
         """
         Return the index in the list where the given model index lives
         """
-        if 'phoenix' in wx.PlatformInfo:
-            return self.FindItem(-1, modelIndex)
-        else:
-            return self.FindItemData(-1, modelIndex)
+        return self.FindItem(-1, modelIndex)
 
     #-------------------------------------------------------------------------
     # Cell editing
@@ -2162,10 +2120,7 @@ class ObjectListView(wx.ListCtrl):
         """
         Perform the normal configuration on the cell editor.
         """
-        if 'phoenix' in wx.PlatformInfo:
-            editor.SetSize(*bounds)
-        else:
-            editor.SetDimensions(*bounds)
+        editor.SetSize(*bounds)
 
         colour = self.GetItemBackgroundColour(rowIndex)
         if colour.IsOk():
@@ -2751,10 +2706,7 @@ class GroupListView(FastObjectListView):
         Initialize the images used to indicate expanded/collapsed state of groups.
         """
         def _makeBitmap(state, size):
-            if 'phoenix' in wx.PlatformInfo:
-                bitmap = wx.Bitmap(size, size)
-            else:
-                bitmap = wx.EmptyBitmap(size, size)
+            bitmap = wx.Bitmap(size, size)
             dc = wx.MemoryDC(bitmap)
             dc.SetBackground(wx.Brush(self.groupBackgroundColour))
             dc.Clear()
@@ -4311,10 +4263,7 @@ def _getSmallUpArrowData():
 
 def _getSmallUpArrowBitmap():
     stream = BytesIO(_getSmallUpArrowData())
-    if 'phoenix' in wx.PlatformInfo:
-        return wx.Bitmap(wx.Image(stream))
-    else:
-        return wx.BitmapFromImage(wx.ImageFromStream(stream))
+    return wx.Bitmap(wx.Image(stream))
 
 
 def _getSmallDownArrowData():
@@ -4329,10 +4278,7 @@ def _getSmallDownArrowData():
 
 def _getSmallDownArrowBitmap():
     stream = BytesIO(_getSmallDownArrowData())
-    if 'phoenix' in wx.PlatformInfo:
-        return wx.Bitmap(wx.Image(stream))
-    else:
-        return wx.BitmapFromImage(wx.ImageFromStream(stream))
+    return wx.Bitmap(wx.Image(stream))
 
 
 #

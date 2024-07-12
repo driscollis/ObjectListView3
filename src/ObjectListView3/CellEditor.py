@@ -50,10 +50,8 @@ __date__ = "3 May 2008"
 import datetime
 import wx
 
-if 'phoenix' in wx.PlatformInfo:
-    from wx.adv import DatePickerCtrl
-else:
-    from wx import DatePickerCtrl
+from wx.adv import DatePickerCtrl
+
 
 
 #======================================================================
@@ -487,10 +485,7 @@ class DateEditor(DatePickerCtrl):
         "Get the value from the editor"
         dt = super(DateEditor, self).GetValue()
         if dt.IsValid():
-            if 'phoenix' in wx.PlatformInfo:
-                return datetime.date(dt.year, dt.month + 1, dt.day)
-            else:
-                return datetime.date(dt.Year, dt.Month + 1, dt.Day)
+            return datetime.date(dt.year, dt.month + 1, dt.day)
         else:
             return None
 

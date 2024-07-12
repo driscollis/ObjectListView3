@@ -302,14 +302,9 @@ class MyFrame(wx.Frame):
         self.searchCtrlFast.SetMinSize((150, -1))
         self.text_ctrl_1_copy_2_copy.SetBackgroundColour(wx.Colour(252, 255, 138))
         self.cbShowGroups.SetValue(1)
-        if 'phoenix' in wx.PlatformInfo:
-            self.cbShowGroups.SetToolTip("Show or hide groups in the control")
-            self.cbLockGroup.SetToolTip("Lock the current groups. Sorting by a different column will change the sort order within the groups, but not the groups themselves")
-            self.cbShowItemCount.SetToolTip("Show item counts in the group titles")
-        else:
-            self.cbShowGroups.SetToolTipString("Show or hide groups in the control")
-            self.cbLockGroup.SetToolTipString("Lock the current groups. Sorting by a different column will change the sort order within the groups, but not the groups themselves")
-            self.cbShowItemCount.SetToolTipString("Show item counts in the group titles")
+        self.cbShowGroups.SetToolTip("Show or hide groups in the control")
+        self.cbLockGroup.SetToolTip("Lock the current groups. Sorting by a different column will change the sort order within the groups, but not the groups themselves")
+        self.cbShowItemCount.SetToolTip("Show item counts in the group titles")
         self.cbShowItemCount.SetValue(1)
         self.searchCtrlGroup.SetMinSize((150, -1))
         self.text_ctrl_1_copy_2_copy_copy.SetBackgroundColour(wx.Colour(252, 255, 138))
@@ -857,10 +852,7 @@ class MyFrame(wx.Frame):
 
             # Give some tracks a funny font
             if random.random() > 0.75:
-                if 'phoenix' in wx.PlatformInfo:
-                    x.font = wx.FFont(11, wx.DEFAULT, faceName=random.choice(fontFaces))
-                else:
-                    x.font = wx.FFont(11, wx.DEFAULT, face=random.choice(fontFaces))
+                x.font = wx.FFont(11, wx.DEFAULT, faceName=random.choice(fontFaces))
             else:
                 x.font = None
 
@@ -1054,10 +1046,7 @@ class MyFrame(wx.Frame):
         # Just to show how to do it, this changes the message and the font that is
         # shown when the list is empty
         self.olvFast.SetEmptyListMsg("This is a long message that shows only when the list is empty")
-        if 'phoenix' in wx.PlatformInfo:
-            self.olvFast.SetEmptyListMsgFont(wx.FFont(24, wx.DEFAULT, faceName="Tekton"))
-        else:
-            self.olvFast.SetEmptyListMsgFont(wx.FFont(24, wx.DEFAULT, face="Tekton"))
+        self.olvFast.SetEmptyListMsgFont(wx.FFont(24, wx.DEFAULT, faceName="Tekton"))
 
         self.olvFast.rowFormatter = rowFormatter
         self.olvFast.SetColumns(columns)
