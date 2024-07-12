@@ -254,7 +254,7 @@ class LongEditor(BaseCellTextEditor):
         s = super(LongEditor, self).GetValue().strip()
         try:
             if sys.version_info < (3,):
-                return long(s)
+                return int(s)
             else:
                 return int(s)
         except ValueError:
@@ -263,7 +263,7 @@ class LongEditor(BaseCellTextEditor):
     def SetValue(self, value):
         "Put a new value into the editor"
         if sys.version_info < (3,):
-            number_types = (int, long, float)
+            number_types = (int, int, float)
         else:
             number_types = (int, float)
 
@@ -429,12 +429,12 @@ class DateTimeEditor(BaseCellTextEditor):
 #----------------------------------------------------------------------------
 
 
-class NumericValidator(wx.PyValidator):
+class NumericValidator(wx.Validator):
 
     """This validator only accepts numeric keys"""
 
     def __init__(self, acceptableChars="0123456789+-"):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.Bind(wx.EVT_CHAR, self._OnChar)
         self.acceptableChars = acceptableChars
         self.acceptableCodes = [ord(x) for x in self.acceptableChars]
