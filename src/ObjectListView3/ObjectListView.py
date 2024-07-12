@@ -281,8 +281,8 @@ class ObjectListView(wx.ListCtrl):
             "typingSearchesSortColumn",
             True)
 
-        self.evenRowsBackColor = wx.Colour(240, 248, 255)  # ALICE BLUE
-        self.oddRowsBackColor = wx.Colour(255, 250, 205)  # LEMON CHIFFON
+        self.evenRowsBackColor = kwargs.pop("evenRowsBackColor", wx.Colour(240, 248, 255))  # defaults to ALICE BLUE
+        self.oddRowsBackColor = kwargs.pop("oddRowsBackColor", wx.Colour(255, 250, 205))  # defaults to LEMON CHIFFON
 
         wx.ListCtrl.__init__(self, *args, **kwargs)
 
