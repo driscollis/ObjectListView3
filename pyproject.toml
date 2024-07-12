@@ -16,3 +16,6 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/driscollis/ObjectListView3"
 Issues = "https://github.com/driscollis/ObjectListView3/issues"
+
+[tool.ruff]
+exclude = ["__init__.py", "test", "Examples"]
