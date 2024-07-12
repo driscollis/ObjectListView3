@@ -100,7 +100,6 @@ import datetime
 import itertools
 import locale
 import operator
-import string
 import time
 import unicodedata
 
@@ -358,7 +357,7 @@ class ObjectListView(wx.ListCtrl):
         info.Mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
         if isinstance(
                 defn.headerImage,
-                six.string_types) and self.smallImageList is not None:
+                str) and self.smallImageList is not None:
             info.Image = self.smallImageList.GetImageIndex(
                 defn.headerImage)
         else:
@@ -1824,13 +1823,13 @@ class ObjectListView(wx.ListCtrl):
             value2 = col.GetValue(object2)
             try:
                 return locale.strcoll(value1.lower(), value2.lower())
-            except:
+            except Exception:
                 # protect for unorderable types in Py3
-                if type(a) == type(b) and b is not None:
-                    return (a > b) - (a < b)
+                if type(value1) == type(value2) and value2 is not None:
+                    return (value1 > value2) - (value1 < value2)
                 else:
-                    aS = str(a)
-                    bS = str(b)
+                    aS = str(value1)
+                    bS = str(value2)
                     return (aS > bS) - (aS < bS)
 
         def _objectComparer(object1, object2):
@@ -3318,7 +3317,7 @@ class GroupListView(FastObjectListView):
         def _getLowerCaseKey(group):
             try:
                 return group.key.lower()
-            except:
+            except AttributeError:
                 return group.key
 
         groups = sorted(groups, key=_getLowerCaseKey,
@@ -3730,7 +3729,7 @@ class ColumnDefn(object):
         try:
             return fmt % value
         except UnicodeError:
-            return unicode(fmt) % value
+            return str(fmt) % value
 
     def GetGroupKey(self, modelObject):
         """
@@ -3831,7 +3830,7 @@ class ColumnDefn(object):
         try:
             modelObject[munger] = value
             return
-        except:
+        except IndexError:
             pass
 
         # Is munger the name of some slot in the modelObject?
@@ -3853,7 +3852,7 @@ class ColumnDefn(object):
         # still go wrong.
         try:
             setattr(modelObject, munger, value)
-        except:
+        except Exception:
             pass
 
     def _Munge(self, modelObject, munger):
@@ -3902,7 +3901,7 @@ class ColumnDefn(object):
         # Try dictionary-like indexing
         try:
             return modelObject[munger]
-        except:
+        except IndexError:
             return None
 
     #-------------------------------------------------------------------------
@@ -4185,7 +4184,7 @@ class BatchedUpdate(object):
 
         self.objectsToRefresh.extend(modelObjects)
 
-    def RemoveObject(self, modelObjects):
+    def RemoveObject(self, modelObject):
         """
         Remember the given model objects so that they can be removed when the next update cycle occurs
         """
@@ -4248,8 +4247,8 @@ class BatchedUpdate(object):
 #----------------------------------------------------------------------------
 # Built in images so clients don't have to do the same
 
-from io import BytesIO
-import zlib
+from io import BytesIO  # noqa: E402
+import zlib  # noqa: E402
 
 
 def _getSmallUpArrowData():
