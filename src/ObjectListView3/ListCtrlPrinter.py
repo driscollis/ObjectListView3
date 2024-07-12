@@ -3009,7 +3009,7 @@ class RectUtils:
         try:
             delta[0]  # is it indexable?
             return RectUtils.InsetRect(r, delta)
-        except IndexError as e:
+        except IndexError:
             return RectUtils.InsetRect(r, (delta, delta, delta, delta))
 
     @staticmethod
