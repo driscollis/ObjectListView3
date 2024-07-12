@@ -1,5 +1,4 @@
 # borrowed from wxPython Phoenix
-import imp_unittest
 import unittest
 import wx
 import sys
