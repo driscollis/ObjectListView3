@@ -2958,8 +2958,8 @@ class RectUtils:
     # Modifying
 
     @staticmethod
-    def SetLeft(r, l):
-        r[0] = l
+    def SetLeft(r, left):
+        r[0] = left
         return r
 
     @staticmethod
@@ -3009,7 +3009,7 @@ class RectUtils:
         try:
             delta[0]  # is it indexable?
             return RectUtils.InsetRect(r, delta)
-        except:
+        except IndexError as e:
             return RectUtils.InsetRect(r, (delta, delta, delta, delta))
 
     @staticmethod
