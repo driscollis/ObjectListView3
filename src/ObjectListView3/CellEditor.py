@@ -96,7 +96,7 @@ class EditorRegistry:
 
         if six.PY2:
             self.typeToFunctionMap[int] = self._MakeIntegerEditor
-            self.typeToFunctionMap[long] = self._MakeLongEditor
+            self.typeToFunctionMap[int] = self._MakeLongEditor
         else:
             self.typeToFunctionMap[int] = self._MakeLongEditor
 
@@ -261,7 +261,7 @@ class LongEditor(BaseCellTextEditor):
         s = super(LongEditor, self).GetValue().strip()
         try:
             if sys.version_info < (3,):
-                return long(s)
+                return int(s)
             else:
                 return int(s)
         except ValueError:
@@ -270,7 +270,7 @@ class LongEditor(BaseCellTextEditor):
     def SetValue(self, value):
         "Put a new value into the editor"
         if sys.version_info < (3,):
-            number_types = (int, long, float)
+            number_types = (int, int, float)
         else:
             number_types = (int, float)
 
