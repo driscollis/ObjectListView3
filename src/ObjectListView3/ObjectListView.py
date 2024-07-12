@@ -2328,7 +2328,7 @@ class AbstractVirtualObjectListView(ObjectListView):
 
     Due to the vagarities of virtual lists, rowFormatters must operate in a slightly
     different manner for virtual lists. Instead of being passed a ListItem, rowFormatters
-    are passed a ListItemAttr instance. This supports the same formatting methods as a
+    are passed an ItemAttr instance. This supports the same formatting methods as a
     ListItem -- SetBackgroundColour(), SetTextColour(), SetFont() -- but no other ListItem
     methods. Obviously, being a virtual list, the rowFormatter cannot call any SetItem*
     method on the ListView itself.
@@ -2454,10 +2454,10 @@ class AbstractVirtualObjectListView(ObjectListView):
         if not self.useAlternateBackColors and self.rowFormatter is None:
             return None
 
-        # We have to keep a reference to the ListItemAttr or the garbage collector
+        # We have to keep a reference to the ItemAttr or the garbage collector
         # will clear it up immeditately, before the ListCtrl has time to
         # process it.
-        self.listItemAttr = wx.ListItemAttr()
+        self.listItemAttr = wx.ItemAttr()
         self._FormatOneItem(
             self.listItemAttr,
             itemIdx,
@@ -2509,7 +2509,7 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
 
     Due to the vagarities of virtual lists, rowFormatters must operate in a slightly
     different manner for virtual lists. Instead of being passed a ListItem, rowFormatters
-    are passed a ListItemAttr instance. This supports the same formatting methods as a
+    are passed an ItemAttr instance. This supports the same formatting methods as a
     ListItem -- SetBackgroundColour(), SetTextColour(), SetFont() -- but no other ListItem
     methods. Obviously, being a virtual list, the rowFormatter cannot call any SetItem*
     method on the ListView itself.
@@ -3091,7 +3091,7 @@ class GroupListView(FastObjectListView):
         """
         Return the display attributes that should be used for the given row
         """
-        self.listItemAttr = wx.ListItemAttr()
+        self.listItemAttr = wx.ItemAttr()
 
         modelObject = self.innerList[itemIdx]
 
@@ -3099,7 +3099,7 @@ class GroupListView(FastObjectListView):
             return self.listItemAttr
 
         if isinstance(modelObject, ListGroup):
-            # We have to keep a reference to the ListItemAttr or the garbage collector
+            # We have to keep a reference to the ItemAttr or the garbage collector
             # will clear it up immeditately, before the ListCtrl has time to
             # process it.
             if self.groupFont is not None:
