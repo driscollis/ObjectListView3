@@ -88,11 +88,11 @@ class WordWrapRenderer:
         # DrawLabel only accepts a wx.Rect
         try:
             bounds = wx.Rect(*bounds)
-        except:
+        except Exception:
             pass
 
         if allowClipping:
-            clipper = wx.DCClipper(dc, bounds)
+            _ = wx.DCClipper(dc, bounds)
 
         # There is a bug in the wordwrap routine where a string that needs truncated and
         # that ends with a single space causes the method to throw an error (wx 2.8).
@@ -132,7 +132,7 @@ class WordWrapRenderer:
 
         try:
             bounds = wx.Rect(*bounds)
-        except:
+        except Exception:
             pass
         lines = WordWrapRenderer._Truncate(
             dc,
