@@ -50,8 +50,6 @@ __date__ = "3 May 2008"
 import datetime
 import wx
 
-import six
-
 if 'phoenix' in wx.PlatformInfo:
     from wx.adv import DatePickerCtrl
 else:
@@ -90,14 +88,9 @@ class EditorRegistry:
 
         # Standard types and their creator functions
         self.typeToFunctionMap[str] = self._MakeStringEditor
-        self.typeToFunctionMap[six.text_type] = self._MakeStringEditor
         self.typeToFunctionMap[bool] = self._MakeBoolEditor
 
-        if six.PY2:
-            self.typeToFunctionMap[int] = self._MakeIntegerEditor
-            self.typeToFunctionMap[long] = self._MakeLongEditor
-        else:
-            self.typeToFunctionMap[int] = self._MakeLongEditor
+        self.typeToFunctionMap[int] = self._MakeLongEditor
 
         self.typeToFunctionMap[float] = self._MakeFloatEditor
         self.typeToFunctionMap[datetime.datetime] = self._MakeDateTimeEditor
@@ -158,7 +151,7 @@ class EditorRegistry:
         dte = DateTimeEditor(olv, subItemIndex)
 
         column = olv.columns[subItemIndex]
-        if isinstance(column.stringConverter, basestring):
+        if isinstance(column.stringConverter, str):
             dte.formatString = column.stringConverter
 
         return dte
@@ -176,7 +169,7 @@ class EditorRegistry:
         editor = TimeEditor(olv, subItemIndex)
 
         column = olv.columns[subItemIndex]
-        if isinstance(column.stringConverter, basestring):
+        if isinstance(column.stringConverter, str):
             editor.formatString = column.stringConverter
 
         return editor
@@ -427,12 +420,12 @@ class DateTimeEditor(BaseCellTextEditor):
 #----------------------------------------------------------------------------
 
 
-class NumericValidator(wx.PyValidator):
+class NumericValidator(wx.Validator):
 
     """This validator only accepts numeric keys"""
 
     def __init__(self, acceptableChars="0123456789+-"):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.Bind(wx.EVT_CHAR, self._OnChar)
         self.acceptableChars = acceptableChars
         self.acceptableCodes = [ord(x) for x in self.acceptableChars]

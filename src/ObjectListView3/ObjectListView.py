@@ -102,22 +102,10 @@ import locale
 import operator
 import string
 import time
-import six
 import unicodedata
 
 from . import CellEditor
 from . import OLVEvent
-
-if six.PY3:
-    # python 3 lacks cmp:
-    def cmp(a, b):
-        # protect for unorderable types in Py3
-        if type(a) == type(b) and b is not None:
-            return (a > b) - (a < b)
-        else:
-            aS = str(a)
-            bS = str(b)
-            return (aS > bS) - (aS < bS)
 
 
 class ObjectListView(wx.ListCtrl):
@@ -281,8 +269,8 @@ class ObjectListView(wx.ListCtrl):
             "typingSearchesSortColumn",
             True)
 
-        self.evenRowsBackColor = wx.Colour(240, 248, 255)  # ALICE BLUE
-        self.oddRowsBackColor = wx.Colour(255, 250, 205)  # LEMON CHIFFON
+        self.evenRowsBackColor = kwargs.pop("evenRowsBackColor", wx.Colour(240, 248, 255))  # defaults to ALICE BLUE
+        self.oddRowsBackColor = kwargs.pop("oddRowsBackColor", wx.Colour(255, 250, 205))  # defaults to LEMON CHIFFON
 
         wx.ListCtrl.__init__(self, *args, **kwargs)
 
@@ -371,7 +359,7 @@ class ObjectListView(wx.ListCtrl):
             info.Mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
             if isinstance(
                     defn.headerImage,
-                    six.string_types) and self.smallImageList is not None:
+                    str) and self.smallImageList is not None:
                 info.Image = self.smallImageList.GetImageIndex(
                     defn.headerImage)
             else:
@@ -386,7 +374,7 @@ class ObjectListView(wx.ListCtrl):
             info.m_mask = wx.LIST_MASK_TEXT | wx.LIST_MASK_FORMAT
             if isinstance(
                     defn.headerImage,
-                    six.string_types) and self.smallImageList is not None:
+                    str) and self.smallImageList is not None:
                 info.m_image = self.smallImageList.GetImageIndex(
                     defn.headerImage)
             else:
@@ -595,9 +583,9 @@ class ObjectListView(wx.ListCtrl):
         If a name is given, that name can later be used to refer to the images rather
         than having to use the returned index.
         """
-        if isinstance(smallImage, six.string_types):
+        if isinstance(smallImage, str):
             smallImage = wx.Bitmap(smallImage)
-        if isinstance(normalImage, six.string_types):
+        if isinstance(normalImage, str):
             normalImage = wx.Bitmap(normalImage)
 
         # We must have image lists for images to be added to them
@@ -949,7 +937,7 @@ class ObjectListView(wx.ListCtrl):
         columnsToResize = []
         for (i, col) in enumerate(self.columns):
             if col.isSpaceFilling:
-                newWidth = freeSpace * col.freeSpaceProportion / totalProportion
+                newWidth = freeSpace * col.freeSpaceProportion // totalProportion
                 boundedWidth = col.CalcBoundedWidth(newWidth)
                 if newWidth == boundedWidth:
                     columnsToResize.append((i, col))
@@ -962,7 +950,7 @@ class ObjectListView(wx.ListCtrl):
         # Finally, give each remaining space filling column a proportion of the
         # free space
         for (i, col) in columnsToResize:
-            newWidth = freeSpace * col.freeSpaceProportion / totalProportion
+            newWidth = freeSpace * col.freeSpaceProportion // totalProportion
             boundedWidth = col.CalcBoundedWidth(newWidth)
             if self.GetColumnWidth(i) != boundedWidth:
                 self.SetColumnWidth(i, boundedWidth)
@@ -1133,7 +1121,7 @@ class ObjectListView(wx.ListCtrl):
 
         # Not a checkbox column, so just return the image
         imageIndex = column.GetImage(modelObject)
-        if isinstance(imageIndex, six.string_types):
+        if isinstance(imageIndex, str):
             return self.smallImageList.GetImageIndex(imageIndex)
         else:
             return imageIndex
@@ -1475,12 +1463,12 @@ class ObjectListView(wx.ListCtrl):
         # (gtk2-unicode)
         uniKey = evt.UnicodeKey
         if uniKey == 0:
-            uniChar = six.unichr(evt.KeyCode)
+            uniChar = chr(evt.KeyCode)
         else:
             # on some versions of wxPython UnicodeKey returns the character
             # on others it is an integer
             if isinstance(uniKey, int):
-                uniChar = six.unichr(uniKey)
+                uniChar = chr(uniKey)
             else:
                 uniChar = uniKey
         if not self._IsPrintable(uniChar):
@@ -1561,7 +1549,7 @@ class ObjectListView(wx.ListCtrl):
         if searchColumn.useBinarySearch is None:
             aspect = searchColumn.GetValue(self.GetObjectAt(0))
             searchColumn.useBinarySearch = isinstance(
-                aspect, (six.string_types, bool))
+                aspect, (str, bool))
 
         return searchColumn.useBinarySearch
 
@@ -1876,7 +1864,13 @@ class ObjectListView(wx.ListCtrl):
             try:
                 return locale.strcoll(value1.lower(), value2.lower())
             except:
-                return cmp(value1, value2)
+                # protect for unorderable types in Py3
+                if type(a) == type(b) and b is not None:
+                    return (a > b) - (a < b)
+                else:
+                    aS = str(a)
+                    bS = str(b)
+                    return (aS > bS) - (aS < bS)
 
         def _objectComparer(object1, object2):
             result = _singleObjectComparer(sortColumn, object1, object2)
@@ -1980,7 +1974,7 @@ class ObjectListView(wx.ListCtrl):
             headerImage = self.columns[oldSortColumnIndex].headerImage
             if isinstance(
                     headerImage,
-                    six.string_types) and self.smallImageList is not None:
+                    str) and self.smallImageList is not None:
                 headerImage = self.smallImageList.GetImageIndex(headerImage)
             self.SetColumnImage(oldSortColumnIndex, headerImage)
 
@@ -2328,7 +2322,7 @@ class AbstractVirtualObjectListView(ObjectListView):
 
     Due to the vagarities of virtual lists, rowFormatters must operate in a slightly
     different manner for virtual lists. Instead of being passed a ListItem, rowFormatters
-    are passed a ListItemAttr instance. This supports the same formatting methods as a
+    are passed an ItemAttr instance. This supports the same formatting methods as a
     ListItem -- SetBackgroundColour(), SetTextColour(), SetFont() -- but no other ListItem
     methods. Obviously, being a virtual list, the rowFormatter cannot call any SetItem*
     method on the ListView itself.
@@ -2454,10 +2448,10 @@ class AbstractVirtualObjectListView(ObjectListView):
         if not self.useAlternateBackColors and self.rowFormatter is None:
             return None
 
-        # We have to keep a reference to the ListItemAttr or the garbage collector
+        # We have to keep a reference to the ItemAttr or the garbage collector
         # will clear it up immeditately, before the ListCtrl has time to
         # process it.
-        self.listItemAttr = wx.ListItemAttr()
+        self.listItemAttr = wx.ItemAttr()
         self._FormatOneItem(
             self.listItemAttr,
             itemIdx,
@@ -2509,7 +2503,7 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
 
     Due to the vagarities of virtual lists, rowFormatters must operate in a slightly
     different manner for virtual lists. Instead of being passed a ListItem, rowFormatters
-    are passed a ListItemAttr instance. This supports the same formatting methods as a
+    are passed an ItemAttr instance. This supports the same formatting methods as a
     ListItem -- SetBackgroundColour(), SetTextColour(), SetFont() -- but no other ListItem
     methods. Obviously, being a virtual list, the rowFormatter cannot call any SetItem*
     method on the ListView itself.
@@ -3091,7 +3085,7 @@ class GroupListView(FastObjectListView):
         """
         Return the display attributes that should be used for the given row
         """
-        self.listItemAttr = wx.ListItemAttr()
+        self.listItemAttr = wx.ItemAttr()
 
         modelObject = self.innerList[itemIdx]
 
@@ -3099,7 +3093,7 @@ class GroupListView(FastObjectListView):
             return self.listItemAttr
 
         if isinstance(modelObject, ListGroup):
-            # We have to keep a reference to the ListItemAttr or the garbage collector
+            # We have to keep a reference to the ItemAttr or the garbage collector
             # will clear it up immeditately, before the ListCtrl has time to
             # process it.
             if self.groupFont is not None:
@@ -3375,13 +3369,10 @@ class GroupListView(FastObjectListView):
             except:
                 return group.key
 
-        if six.PY2:
-            groups.sort(key=_getLowerCaseKey, reverse=(not ascending))
-        else:
-            groups = sorted(groups, key=_getLowerCaseKey,
-                            reverse=(not ascending))
-            # update self.groups which is used e.g. in _SetGroups
-            self.groups = groups
+        groups = sorted(groups, key=_getLowerCaseKey,
+                        reverse=(not ascending))
+        # update self.groups which is used e.g. in _SetGroups
+        self.groups = groups
 
         # Sort the model objects within each group.
         for x in groups:
@@ -4305,7 +4296,7 @@ class BatchedUpdate(object):
 #----------------------------------------------------------------------------
 # Built in images so clients don't have to do the same
 
-from six import BytesIO
+from io import BytesIO
 import zlib
 
 
