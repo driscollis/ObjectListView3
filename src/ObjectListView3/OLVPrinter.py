@@ -141,7 +141,7 @@ class OLVPrinter(wx.Printout):
                 "Printing",
                 wx.OK)
 
-        printout.Destroy()
+        printer.Destroy()
 
     #-------------------------------------------------------------------------
     # Event handlers
@@ -1317,7 +1317,7 @@ class ColumnHeaderBlock(CellBlock):
         if self.engine.alwaysCenterColumnHeader:
             return [wx.ALIGN_CENTRE for i in range(self.left, self.right + 1)]
         else:
-            return self.GetColumnAlignments(olv, self.left, self.right)
+            return self.GetColumnAlignments(self.olv, self.left, self.right)
 
     def GetImages(self):
         """
@@ -1723,8 +1723,8 @@ class RectUtils:
     # Modifying
 
     @staticmethod
-    def SetLeft(r, l):
-        r[0] = l
+    def SetLeft(r, left):
+        r[0] = left
         return r
 
     @staticmethod
@@ -1774,7 +1774,7 @@ class RectUtils:
         try:
             delta[0]  # is it indexable?
             return RectUtils.InsetRect(r, delta)
-        except:
+        except IndexError:
             return RectUtils.InsetRect(r, (delta, delta, delta, delta))
 
     @staticmethod
@@ -1829,7 +1829,7 @@ if __name__ == '__main__':
             groupImage = self.olv.AddImages(
                 ExampleImages.getGroup16Bitmap(),
                 ExampleImages.getGroup32Bitmap())
-            userImage = self.olv.AddImages(
+            _ = self.olv.AddImages(
                 ExampleImages.getUser16Bitmap(),
                 ExampleImages.getUser32Bitmap())
             musicImage = self.olv.AddImages(
