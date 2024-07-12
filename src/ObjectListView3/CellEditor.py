@@ -96,7 +96,7 @@ class EditorRegistry:
 
         if six.PY2:
             self.typeToFunctionMap[int] = self._MakeIntegerEditor
-            self.typeToFunctionMap[long] = self._MakeLongEditor
+            self.typeToFunctionMap[int] = self._MakeLongEditor
         else:
             self.typeToFunctionMap[int] = self._MakeLongEditor
 
@@ -159,7 +159,7 @@ class EditorRegistry:
         dte = DateTimeEditor(olv, subItemIndex)
 
         column = olv.columns[subItemIndex]
-        if isinstance(column.stringConverter, basestring):
+        if isinstance(column.stringConverter, str):
             dte.formatString = column.stringConverter
 
         return dte
@@ -177,7 +177,7 @@ class EditorRegistry:
         editor = TimeEditor(olv, subItemIndex)
 
         column = olv.columns[subItemIndex]
-        if isinstance(column.stringConverter, basestring):
+        if isinstance(column.stringConverter, str):
             editor.formatString = column.stringConverter
 
         return editor
@@ -261,7 +261,7 @@ class LongEditor(BaseCellTextEditor):
         s = super(LongEditor, self).GetValue().strip()
         try:
             if sys.version_info < (3,):
-                return long(s)
+                return int(s)
             else:
                 return int(s)
         except ValueError:
@@ -270,7 +270,7 @@ class LongEditor(BaseCellTextEditor):
     def SetValue(self, value):
         "Put a new value into the editor"
         if sys.version_info < (3,):
-            number_types = (int, long, float)
+            number_types = (int, int, float)
         else:
             number_types = (int, float)
 
@@ -436,12 +436,12 @@ class DateTimeEditor(BaseCellTextEditor):
 #----------------------------------------------------------------------------
 
 
-class NumericValidator(wx.PyValidator):
+class NumericValidator(wx.Validator):
 
     """This validator only accepts numeric keys"""
 
     def __init__(self, acceptableChars="0123456789+-"):
-        wx.PyValidator.__init__(self)
+        wx.Validator.__init__(self)
         self.Bind(wx.EVT_CHAR, self._OnChar)
         self.acceptableChars = acceptableChars
         self.acceptableCodes = [ord(x) for x in self.acceptableChars]
