@@ -51,8 +51,6 @@ __date__ = "3 May 2008"
 import datetime
 import wx
 
-import six
-
 if 'phoenix' in wx.PlatformInfo:
     from wx.adv import DatePickerCtrl
 else:
@@ -91,14 +89,9 @@ class EditorRegistry:
 
         # Standard types and their creator functions
         self.typeToFunctionMap[str] = self._MakeStringEditor
-        self.typeToFunctionMap[six.text_type] = self._MakeStringEditor
         self.typeToFunctionMap[bool] = self._MakeBoolEditor
 
-        if six.PY2:
-            self.typeToFunctionMap[int] = self._MakeIntegerEditor
-            self.typeToFunctionMap[int] = self._MakeLongEditor
-        else:
-            self.typeToFunctionMap[int] = self._MakeLongEditor
+        self.typeToFunctionMap[int] = self._MakeLongEditor
 
         self.typeToFunctionMap[float] = self._MakeFloatEditor
         self.typeToFunctionMap[datetime.datetime] = self._MakeDateTimeEditor
