@@ -13,7 +13,7 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView3 import ObjectListView, ColumnDefn
+import ObjectListView3 as OLV
 
 # We store our images as python code
 import ExampleImages
@@ -54,7 +54,7 @@ class MyFrame(wx.Frame):
         sizer_1.Add(panel, 1, wx.ALL|wx.EXPAND)
         self.SetSizer(sizer_1)
 
-        self.myOlv = ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.myOlv = OLV.ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
         sizer_2.Add(self.myOlv, 1, wx.ALL|wx.EXPAND, 4)
         panel.SetSizer(sizer_2)
@@ -74,16 +74,16 @@ class MyFrame(wx.Frame):
                 return groupImage
 
         self.myOlv.SetColumns([
-            ColumnDefn("Title", "left", -1, "title", imageGetter=musicImage),
-            ColumnDefn("Artist", "left", -1, "artist", imageGetter=artistImageGetter),
-            ColumnDefn("Album", "center", -1, "album")
+            OLV.ColumnDefn("Title", "left", -1, "title", imageGetter=musicImage),
+            OLV.ColumnDefn("Artist", "left", -1, "artist", imageGetter=artistImageGetter),
+            OLV.ColumnDefn("Album", "center", -1, "album")
         ])
         self.myOlv.SetObjects(self.listOfDictionaries)
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp(0)
+    print('Using {} ({}) from {}.'.format(OLV.__name__, OLV.__version__, OLV.__path__))
+    app = wx.App()
     wx.InitAllImageHandlers()
-    frame_1 = MyFrame(None, -1, "ObjectListView Dictionary Example")
-    app.SetTopWindow(frame_1)
-    frame_1.Show()
+    frame = MyFrame(None, -1, "ObjectListView Dictionary Example")
+    frame.Show()
     app.MainLoop()
