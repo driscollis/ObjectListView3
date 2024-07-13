@@ -17,7 +17,7 @@ __date__ = "24 July 2008"
 __version__ = "1.1"
 
 
-from datetime import datetime, time
+import datetime
 import os
 import random
 import time
@@ -842,8 +842,8 @@ class MyFrame(wx.Frame):
         for x in self.dataObjects:
             # Convert the 'duration' and 'lastPlayed' attributes into a time() and a datetime() respectively
             minsAndSeconds = x.duration.split(":")
-            x.duration = time(minute=int(minsAndSeconds[0]), second=int(minsAndSeconds[1]))
-            x.lastPlayed = datetime(*(time.strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
+            x.duration = datetime.time(minute=int(minsAndSeconds[0]), second=int(minsAndSeconds[1]))
+            x.lastPlayed = datetime.datetime(*(time.strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
 
             # Give some tracks a dark colour that can be used for the text
             x.trackColour = random.choice(colours)
