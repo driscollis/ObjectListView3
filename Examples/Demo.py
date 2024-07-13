@@ -673,7 +673,7 @@ class MyFrame(wx.Frame):
             Track(title="Explode", artist="Nelly Furtado", size=4.1, album="Folklore", genre="Pop", rating=80, duration="3:44", lastPlayed="15/03/2008 6:53"),
             Track(title="Try", artist="Nelly Furtado", size=4.9, album="Folklore", genre="Pop", rating=80, duration="4:39", lastPlayed="15/03/2008 11:49"),
             Track(title="Fresh off the Boat", artist="Nelly Furtado", size=3.7, album="Folklore", genre="Pop", rating=60, duration="3:16", lastPlayed="22/02/2008 12:49"),
-            Track(title=u"ForÃ§a", artist="Nelly Furtado", size=4, album="Folklore", genre="Pop", rating=40, duration="3:40", lastPlayed="22/02/2008 12:53"),
+            Track(title="ForÃ§a", artist="Nelly Furtado", size=4, album="Folklore", genre="Pop", rating=40, duration="3:40", lastPlayed="22/02/2008 12:53"),
             Track(title="The Grass Is Green", artist="Nelly Furtado", size=4.2, album="Folklore", genre="Pop", rating=40, duration="3:50", lastPlayed="22/02/2008 12:57"),
             Track(title="Picture Perfect", artist="Nelly Furtado", size=5.5, album="Folklore", genre="Pop", rating=40, duration="5:15", lastPlayed="19/01/2008 12:08"),
             Track(title="Saturdays", artist="Jarvis Church/Nelly Furtado", size=2.6, album="Folklore", genre="Pop", rating=40, duration="2:05", lastPlayed="7/01/2008 7:33"),
@@ -1173,8 +1173,8 @@ class MyFrame(wx.Frame):
         self.frame_1_statusbar.SetStatusText("Starting profile", 0)
         t = clock()
 
-        import __builtin__, cProfile, pstats
-        __builtin__.__dict__["myFunctionToProfile"] = func
+        import builtins, cProfile, pstats
+        builtins.__dict__["myFunctionToProfile"] = func
         cProfile.run("myFunctionToProfile()", "app.prof")
 
         stats = pstats.Stats("app.prof")

@@ -253,7 +253,7 @@ class ObjectListView(wx.ListCtrl):
         self.selectionBeforeCellEdit = []
         self.checkStateColumn = None
         self.handleStandardKeys = True
-        self.searchPrefix = u""
+        self.searchPrefix = ""
         self.whenLastTypingEvent = 0
         self.filter = None
         self.objectToIndexMap = None
@@ -1412,7 +1412,7 @@ class ObjectListView(wx.ListCtrl):
             return False
 
         if evt.GetKeyCode() in (wx.WXK_BACK, wx.WXK_DELETE):
-            self.searchPrefix = u""
+            self.searchPrefix = ""
             return True
 
         # On which column are we going to compare values? If we should search on the

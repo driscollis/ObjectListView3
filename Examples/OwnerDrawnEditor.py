@@ -83,7 +83,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
         # Build the data behind the control
         fe = wx.FontEnumerator()
         fe.EnumerateFacenames()
-        self.fontInfo = [ Bucket(name=x, display=x+extendedText) for x in sorted(fe.GetFacenames(), key=unicode.lower) ]
+        self.fontInfo = [ Bucket(name=x, display=x+extendedText) for x in sorted(fe.GetFacenames(), key=str.lower) ]
 
         kwargs['style'] = kwargs.get("style", 0) | wx.CB_READONLY
         kwargs["choices"] = [x.name for x in self.fontInfo]

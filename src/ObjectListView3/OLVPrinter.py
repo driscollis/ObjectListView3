@@ -25,8 +25,8 @@ usage should be as simple as::
 
 import wx
 
-from ObjectListView import GroupListView
-from WordWrapRenderer import WordWrapRenderer
+from .ObjectListView import GroupListView
+from .WordWrapRenderer import WordWrapRenderer
 
 #======================================================================
 
@@ -1793,7 +1793,7 @@ class RectUtils:
 
 if __name__ == '__main__':
     import wx
-    from ObjectListView import ObjectListView, GroupListView, ColumnDefn
+    from .ObjectListView import ObjectListView, GroupListView, ColumnDefn
 
     # Where can we find the Example module?
     import sys

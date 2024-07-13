@@ -120,7 +120,7 @@ class MyFrame(wx.Frame):
             self.myOlv.SetEmptyListMsg("Executing statement...")
             self.DoSelect(self.tcSql.GetValue())
             self.CalculatePrimaryKey(self.tcSql.GetValue())
-        except sqlite.Error, e:
+        except sqlite.Error as e:
             self.myOlv.SetEmptyListMsg("Error: %s" % e.args[0])
         self.UpdateListEditability()
 
@@ -140,7 +140,7 @@ class MyFrame(wx.Frame):
         try:
             self.connection.execute(stmt, (evt.rowModel[evt.subItemIndex], evt.rowModel[self.primaryKeyIndex]))
             self.connection.commit()
-        except sqlite.Error, e:
+        except sqlite.Error as e:
             wx.MessageBox("Error when updating: %s.\nStatement: %s" % (e.args[0], stmt))
 
     #----------------------------------------------------------------------------

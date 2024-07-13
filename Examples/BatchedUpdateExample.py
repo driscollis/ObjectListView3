@@ -172,7 +172,7 @@ class MyFrame(wx.Frame):
                 return
             stat.startScan = time.clock()
             names = os.listdir(stat.GetPath())
-            names.sort(key=unicode.lower)
+            names.sort(key=str.lower)
             for name in names:
                 if backgroundProcess.isCancelled():
                     return
