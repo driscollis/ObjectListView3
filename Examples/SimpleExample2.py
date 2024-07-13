@@ -8,8 +8,7 @@ import wx
 import sys
 sys.path.append("..")
 
-import ObjectListView as OLV
-from ObjectListView import ObjectListView, ColumnDefn
+import ObjectListView3 as OLV
 
 import ExampleModel
 import ExampleImages # We store our images as python code
@@ -34,7 +33,7 @@ class MyFrame(wx.Frame):
         sizer_1.Add(panel, 1, wx.ALL|wx.EXPAND)
         self.SetSizer(sizer_1)
 
-        self.myOlv = ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.myOlv = OLV.ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
         sizer_2.Add(self.myOlv, 1, wx.ALL|wx.EXPAND, 4)
         panel.SetSizer(sizer_2)
@@ -68,11 +67,11 @@ class MyFrame(wx.Frame):
                 return "%d bytes" % byteCount
 
         self.myOlv.SetColumns([
-            ColumnDefn("Title", "left", 120, "title", imageGetter=musicImage),
-            ColumnDefn("Artist", "left", 120, "artist", imageGetter=artistImageGetter),
-            ColumnDefn("Size", "center", 100, "sizeInBytes", stringConverter=sizeToNiceString),
-            ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
-            ColumnDefn("Rating", "center", 100, "rating")
+            OLV.ColumnDefn("Title", "left", 120, "title", imageGetter=musicImage),
+            OLV.ColumnDefn("Artist", "left", 120, "artist", imageGetter=artistImageGetter),
+            OLV.ColumnDefn("Size", "center", 100, "sizeInBytes", stringConverter=sizeToNiceString),
+            OLV.ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
+            OLV.ColumnDefn("Rating", "center", 100, "rating")
         ])
         self.myOlv.SetObjects(self.songs)
 

@@ -28,7 +28,7 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView import FastObjectListView, ObjectListView, ColumnDefn, BatchedUpdate
+from ObjectListView3 import FastObjectListView, ObjectListView, ColumnDefn, BatchedUpdate
 
 # We store our images as python code
 import ExampleImages

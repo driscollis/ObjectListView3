@@ -29,10 +29,10 @@ import sys
 sys.path.append("..")
 #sys.path.append("c:/jpp/code/python/ObjectListView/trunk")
 
-from ObjectListView import ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn
-from ObjectListView import EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry
-from ObjectListView import ListCtrlPrinter, ReportFormat
-from ObjectListView import Filter
+from ObjectListView3 import ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn
+from ObjectListView3 import EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry
+from ObjectListView3 import ListCtrlPrinter, ReportFormat
+from ObjectListView3 import Filter
 
 import OwnerDrawnEditor
 

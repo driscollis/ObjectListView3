@@ -5,7 +5,7 @@
 #----------------------------------------------------------------------------
 
 import wx
-import ObjectListView as olv
+import ObjectListView3 as olv
 
 # Where can we find the Example module?
 import sys

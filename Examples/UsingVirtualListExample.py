@@ -37,7 +37,7 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-from ObjectListView import VirtualObjectListView, ColumnDefn, EVT_SORT
+from ObjectListView3 import VirtualObjectListView, ColumnDefn, EVT_SORT
 
 # We store our images as python code
 import ExampleImages

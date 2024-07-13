@@ -13,7 +13,7 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView import ObjectListView, ColumnDefn
+from ObjectListView3 import ObjectListView, ColumnDefn
 
 # We store our images as python code
 import ExampleImages
