@@ -31,7 +31,7 @@ import datetime
 import os
 import os.path
 import re
-import time
+# import time
 import wx
 import sqlite3 as sqlite
 
@@ -74,14 +74,14 @@ class MyFrame(wx.Frame):
         connection.execute(CREATE_STMT)
         connection.commit()
 
-        start = time.clock()
+        # start = time.perf_counter()
         i = 0
         while i < NUMBER_OF_ROWS:
             for x in ExampleModel.GetTracks():
                 connection.execute(INSERT_STMT, [i, x.title + str(i), x.artist, x.album, x.sizeInBytes, x.rating])
                 i += 1
         connection.commit()
-        #print "Building database of %d rows took %2f seconds." % (NUMBER_OF_ROWS, time.clock() - start)
+        # print("Building database of %d rows took %2f seconds." % (NUMBER_OF_ROWS, time.perf_counter() - start))
 
         return connection
 

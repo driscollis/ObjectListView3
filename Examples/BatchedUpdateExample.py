@@ -163,14 +163,14 @@ class MyFrame(wx.Frame):
         #    self.tcRoot.SetBackgroundColour(wx.Colour(255, 255, 0))
 
     def Walker(self, backgroundProcess):
-        backgroundProcess.start = time.clock()
+        backgroundProcess.start = time.perf_counter()
         backgroundProcess.stats = list()
         stats = [DirectoryStats(None, backgroundProcess.path)]
         wx.CallAfter(self.olv.SetObjects, stats)
         for stat in stats:
             if backgroundProcess.isCancelled():
                 return
-            stat.startScan = time.clock()
+            stat.startScan = time.perf_counter()
             names = os.listdir(stat.GetPath())
             names.sort(key=str.lower)
             for name in names:
@@ -185,7 +185,7 @@ class MyFrame(wx.Frame):
                         stat.sizeFiles += os.path.getsize(subPath)
                     except WindowsError:
                         pass
-            stat.endScan = time.clock()
+            stat.endScan = time.perf_counter()
             if not backgroundProcess.isCancelled():
                 wx.CallAfter(self.olv.AddObjects, stat.children)
                 wx.CallAfter(self.olv.RefreshObjects, stat.SelfPlusAncestors())
@@ -199,7 +199,7 @@ class MyFrame(wx.Frame):
         if backgroundProcess.isCancelled():
             self.statusbar.SetStatusText("Tree walk was cancelled")
         else:
-            backgroundProcess.end = time.clock()
+            backgroundProcess.end = time.perf_counter()
             self.olv.SetObjects(backgroundProcess.stats)
             self.statusbar.SetStatusText("%d directories scanned in %.2f seconds" %
                                          (len(backgroundProcess.stats), backgroundProcess.end - backgroundProcess.start))

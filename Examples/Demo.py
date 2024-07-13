@@ -20,7 +20,7 @@ __version__ = "1.1"
 from datetime import datetime, time
 import os
 import random
-from time import clock, strptime
+import time
 
 import wx
 import wx.lib.colourdb as colourdb
@@ -843,7 +843,7 @@ class MyFrame(wx.Frame):
             # Convert the 'duration' and 'lastPlayed' attributes into a time() and a datetime() respectively
             minsAndSeconds = x.duration.split(":")
             x.duration = time(minute=int(minsAndSeconds[0]), second=int(minsAndSeconds[1]))
-            x.lastPlayed = datetime(*(strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
+            x.lastPlayed = datetime(*(time.strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
 
             # Give some tracks a dark colour that can be used for the text
             x.trackColour = random.choice(colours)
@@ -1160,18 +1160,18 @@ class MyFrame(wx.Frame):
         self._timeCall(func, "Updating the selected items out of %d items took %%0.2f milliseconds" % olv.GetItemCount())
 
     def _timeCall(self, func, msg):
-        t = clock()
+        t = time.perf_counter()
         simpleTiming = True
         if simpleTiming:
             func()
         else:
             self._profileCall(func, msg)
-        statusMsg = msg % ((clock()-t)*1000)
+        statusMsg = msg % ((time.perf_counter()-t)*1000)
         self.frame_1_statusbar.SetStatusText(statusMsg, 0)
 
     def _profileCall(self, func, msg):
         self.frame_1_statusbar.SetStatusText("Starting profile", 0)
-        t = clock()
+        t = time.perf_counter()
 
         import builtins, cProfile, pstats
         builtins.__dict__["myFunctionToProfile"] = func
@@ -1180,7 +1180,7 @@ class MyFrame(wx.Frame):
         stats = pstats.Stats("app.prof")
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
-        print(msg % ((clock()-t)*1000))
+        print(msg % ((time.perf_counter()-t)*1000))
         stats.print_stats(30)
         os.remove("app.prof")
 

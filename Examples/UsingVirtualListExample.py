@@ -63,7 +63,7 @@ class MyFrame(wx.Frame):
         wx.CallLater(1, self.InitModel)
 
     def InitModel(self):
-        start = time.clock()
+        start = time.perf_counter()
         path = os.path.join(wx.StandardPaths.Get().GetTempDir(), "VirtualListExample.sqlite")
         if os.path.exists(path):
             os.remove(path)
@@ -110,7 +110,7 @@ class MyFrame(wx.Frame):
         result = cur.fetchone()
         self.myOlv.SetItemCount(int(result[0]))
 
-        print("Building database %d rows of took %2f seconds." % (self.myOlv.GetItemCount(), time.clock() - start))
+        print("Building database %d rows of took %2f seconds." % (self.myOlv.GetItemCount(), time.perf_counter() - start))
 
     def InitWidgets(self):
         panel = wx.Panel(self, -1)
@@ -167,7 +167,7 @@ class MyFrame(wx.Frame):
         """
         The user wants to sort the virtual list.
         """
-        start = time.clock()
+        start = time.perf_counter()
 
         columnName = evt.objectListView.columns[evt.sortColumnIndex].valueGetter
         if evt.sortAscending:
@@ -179,7 +179,7 @@ class MyFrame(wx.Frame):
         self.reorderList = [x[0] for x in cur.fetchall()]
         self.myOlv.RefreshObjects()
 
-        print("Sorting took %2f seconds." % (time.clock() - start))
+        print("Sorting took %2f seconds." % (time.perf_counter() - start))
 
 
 if __name__ == '__main__':
