@@ -1825,7 +1825,7 @@ class ObjectListView(wx.ListCtrl):
                 return locale.strcoll(value1.lower(), value2.lower())
             except Exception:
                 # protect for unorderable types in Py3
-                if type(value1) == type(value2) and value2 is not None:
+                if type(value1) is type(value2) and value2 is not None:
                     return (value1 > value2) - (value1 < value2)
                 else:
                     aS = str(value1)
