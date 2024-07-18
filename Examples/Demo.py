@@ -29,12 +29,13 @@ import sys
 sys.path.append("..")
 #sys.path.append("c:/jpp/code/python/ObjectListView/trunk")
 
-from ObjectListView3 import ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn
-from ObjectListView3 import EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry
-from ObjectListView3 import ListCtrlPrinter, ReportFormat
-from ObjectListView3 import Filter
+from ObjectListView3 import (                                       # noqa: E402
+    ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn,
+    EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry,
+    ListCtrlPrinter, ReportFormat,
+    Filter)
 
-import OwnerDrawnEditor
+import OwnerDrawnEditor                                             # noqa: E402
 
 # begin wxGlade: extracode
 # end wxGlade
@@ -1173,7 +1174,9 @@ class MyFrame(wx.Frame):
         self.frame_1_statusbar.SetStatusText("Starting profile", 0)
         t = time.perf_counter()
 
-        import builtins, cProfile, pstats
+        import builtins
+        import cProfile
+        import pstats
         builtins.__dict__["myFunctionToProfile"] = func
         cProfile.run("myFunctionToProfile()", "app.prof")
 

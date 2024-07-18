@@ -17,7 +17,6 @@ This example shows how to use a BatchedUpdate adapter.
 
 """
 
-import datetime
 import os
 import os.path
 import threading
@@ -28,7 +27,8 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView3 import FastObjectListView, ObjectListView, ColumnDefn, BatchedUpdate
+from ObjectListView3 import (                                       # noqa: E402
+    FastObjectListView, ColumnDefn, BatchedUpdate)
 
 
 class MyFrame(wx.Frame):
@@ -93,7 +93,7 @@ class MyFrame(wx.Frame):
         self.scSeconds.SetValue(2)
         self.tcRoot.SetPath(wx.StandardPaths.Get().GetDocumentsDir())
 
-        # OK, This is the whole point of the example. Wrap the ObjectListView in a batch updater
+        # OK, This is the whole point of the example. Wrap the FastObjectListView in a batch updater
         self.olv = BatchedUpdate(self.olv, 2)
 
     def InitModel(self):
@@ -144,7 +144,7 @@ class MyFrame(wx.Frame):
                 if isinstance(self.olv, BatchedUpdate):
                     self.olv.updatePeriod = self.scSeconds.GetValue()
                 else:
-                    self.olv = BatchedUpdate(olv, self.scSeconds.GetValue())
+                    self.olv = BatchedUpdate(self.olv, self.scSeconds.GetValue())
             else:
                 if isinstance(self.olv, BatchedUpdate):
                     self.olv = self.olv.objectListView

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-import datetime
 import wx
 
 # Where can we find the ObjectListView module?
 import sys
 sys.path.append("..")
 
-import ObjectListView3 as OLV
+import ObjectListView3 as OLV                                       # noqa: E402
 
-import ExampleModel
-import ExampleImages # We store our images as python code
+import ExampleModel                                                 # noqa: E402
+import ExampleImages # We store our images as python code           # noqa: E402
 
 
 class MyFrame(wx.Frame):

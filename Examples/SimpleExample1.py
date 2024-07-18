@@ -7,9 +7,9 @@ import wx
 import sys
 sys.path.append("..")
 
-import ObjectListView3 as OLV
+import ObjectListView3 as OLV                                       # noqa: E402
 
-import ExampleModel
+import ExampleModel                                                 # noqa: E402
 
 class MyFrame(wx.Frame):
     def __init__(self, *args, **kwds):

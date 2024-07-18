@@ -27,7 +27,6 @@ but the updating is simple-minded and will be confused by anything complicated.
 
 """
 
-import datetime
 import os
 import os.path
 import re
@@ -39,9 +38,11 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-from ObjectListView3 import ObjectListView, FastObjectListView, ColumnDefn, EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING
+from ObjectListView3 import (                                       # noqa: E402
+    ObjectListView, FastObjectListView, ColumnDefn,
+    EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING)
 
-import ExampleModel
+import ExampleModel                                                 # noqa: E402
 
 class MyFrame(wx.Frame):
 

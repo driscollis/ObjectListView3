@@ -26,7 +26,6 @@ You can change the size of the temporary database by
 changing NUMBER_OF_ROWS.
 """
 
-import datetime
 import os
 import os.path
 import time
@@ -37,10 +36,10 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-import ObjectListView3 as OLV
+import ObjectListView3 as OLV                                       # noqa: E402
 
 # We store our images as python code
-import ExampleImages
+import ExampleImages                                                # noqa: E402
 
 class MyFrame(wx.Frame):
 

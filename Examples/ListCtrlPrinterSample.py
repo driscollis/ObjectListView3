@@ -5,14 +5,15 @@
 #----------------------------------------------------------------------------
 
 import wx
-import ObjectListView3 as olv
 
 # Where can we find the Example module?
 import sys
 sys.path.append("../Examples")
 
-import ExampleModel
-import ExampleImages
+import ObjectListView3 as olv                                       # noqa: E402
+
+import ExampleModel                                                 # noqa: E402
+import ExampleImages                                                # noqa: E402
 
 class MyFrame(wx.Frame):
 
@@ -84,7 +85,7 @@ class MyFrame(wx.Frame):
 		#import os
 		#iName = "images/music32.png"
 		#os.path.exists(iName)
-		#img = wx.Image(iName, type=wx.BITMAP_TYPE_PNG)		
+		#img = wx.Image(iName, type=wx.BITMAP_TYPE_PNG)
 		#printer.ReportFormat.Page.Add(olv.ImageDecoration(
 			#img, wx.CENTER, wx.CENTER))
 		#printer.ReportFormat.Page.Add(olv.ImageDecoration(

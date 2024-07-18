@@ -5,18 +5,16 @@ This example shows how to use a list of dictionaries as the
 datasource for an ObjectListView
 """
 
-import datetime
-import time
 import wx
 
 # Where can we find the ObjectListView module?
 import sys
 sys.path.append("..")
 
-import ObjectListView3 as OLV
+import ObjectListView3 as OLV                                       # noqa: E402
 
 # We store our images as python code
-import ExampleImages
+import ExampleImages                                                # noqa: E402
 
 class MyFrame(wx.Frame):
     def __init__(self, *args, **kwds):

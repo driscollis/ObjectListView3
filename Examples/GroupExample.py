@@ -8,10 +8,10 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView3 import GroupListView, ColumnDefn
+from ObjectListView3 import GroupListView, ColumnDefn               # noqa: E402
 
-import ExampleModel
-import ExampleImages # We store our images as python code
+import ExampleModel                                                 # noqa: E402
+import ExampleImages # We store our images as python code           # noqa: E402
 
 
 class MyFrame(wx.Frame):
