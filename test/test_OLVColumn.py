@@ -3,7 +3,7 @@ import unittest
 import wx
 from datetime import datetime, date, time
 
-from ObjectListView2 import ObjectListView, ColumnDefn
+from ObjectListView3 import ObjectListView, ColumnDefn
 
 
 class TestColumnDefn(unittest.TestCase):

@@ -5,7 +5,7 @@ print(wx.VERSION_STRING)
 import datetime
 import time
 
-from ObjectListView2 import ObjectListView, FastObjectListView, VirtualObjectListView, GroupListView, ColumnDefn, EVT_SORT, Filter
+from ObjectListView3 import ObjectListView, FastObjectListView, VirtualObjectListView, GroupListView, ColumnDefn, EVT_SORT, Filter
 
 
 class Person:
