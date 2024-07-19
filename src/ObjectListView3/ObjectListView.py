@@ -734,7 +734,7 @@ class ObjectListView(wx.ListCtrl):
                 horizDelta = boundsRight - self.GetSize()[0] + (
                     self.GetSize()[0] / 4)
             if wx.Platform == "__WXMSW__":
-                self.ScrollList(horizDelta, 0)
+                self.ScrollList(int(horizDelta), 0)
             else:
                 return None
 
@@ -3830,7 +3830,7 @@ class ColumnDefn(object):
         try:
             modelObject[munger] = value
             return
-        except IndexError:
+        except (IndexError, TypeError):
             pass
 
         # Is munger the name of some slot in the modelObject?
@@ -3901,7 +3901,7 @@ class ColumnDefn(object):
         # Try dictionary-like indexing
         try:
             return modelObject[munger]
-        except IndexError:
+        except (IndexError, KeyError, TypeError):
             return None
 
     #-------------------------------------------------------------------------
