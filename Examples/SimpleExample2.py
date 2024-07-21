@@ -77,8 +77,8 @@ class MyFrame(wx.Frame):
         self.myOlv.SetObjects(self.songs)
 
 if __name__ == '__main__':
-    print("Using {} ({}) from {}".format(OLV.__name__, OLV.__version__, OLV.__path__))
+    print(f"Using {OLV.__name__} ({OLV.__version__}) from {OLV.__path}.")
     app = wx.App()
-    frame = MyFrame(None, -1, "{} ({}) Simple Example 2".format(OLV.__name__, OLV.__version__))
+    frame = MyFrame(None, -1, f"{OLV.__name__} ({OLV.__version__}) Simple Example 2")
     frame.Show()
     app.MainLoop()
