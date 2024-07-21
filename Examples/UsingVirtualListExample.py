@@ -110,7 +110,7 @@ class MyFrame(wx.Frame):
         result = cur.fetchone()
         self.myOlv.SetItemCount(int(result[0]))
 
-        print "Building database %d rows of took %2f seconds." % (self.myOlv.GetItemCount(), time.clock() - start)
+        print(f"Building database {self.myOlv.GetItemCount()} rows of took {(time.clock() - start):2f} seconds.")
 
     def InitWidgets(self):
         panel = wx.Panel(self, -1)
@@ -179,7 +179,7 @@ class MyFrame(wx.Frame):
         self.reorderList = [x[0] for x in cur.fetchall()]
         self.myOlv.RefreshObjects()
 
-        print "Sorting took %2f seconds." % (time.clock() - start)
+        print(f"Sorting took {(time.clock() - start):2f} seconds.")
 
 
 if __name__ == '__main__':

@@ -1106,7 +1106,7 @@ class MyFrame(wx.Frame):
     def _IncrementString(self, s):
         if s[-2:].isdigit():
             s = s[:-3]
-        return s + (" %02d" % self.counter)
+        return f"{s} {self.counter:02d}"
 
     def _MakeAtLeast(self, objects, atLeast):
         """Extend the given collection of objects with copies of our model objects
@@ -1125,39 +1125,53 @@ class MyFrame(wx.Frame):
     # Event handlers - Implementation
 
     def DoRepopulate(self, olv):
-        self._timeCall(olv.RepopulateList, "Populating %d items took %%0.2f milliseconds" % olv.GetItemCount())
+        self._timeCall(
+            olv.RepopulateList,
+            f"Populating {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def DoAdd1000(self, olv):
         self.counter += 1
         def func():
             objects = self._MakeAtLeast([], 1000)
             olv.AddObjects(objects)
-        self._timeCall(func, "Adding 1000 and repopulating %d items took %%0.2f milliseconds" % (olv.GetItemCount()+1000))
+        self._timeCall(
+            func,
+            f"Adding 1000 and repopulating {olv.GetItemCount()+1000} items took %0.2f milliseconds")
 
     def DoAdd1000Virtual(self, olv):
         self.counter += 1
         def func():
             olv.SetItemCount(olv.GetItemCount() + 1000)
-        self._timeCall(func, "Virtually adding 1000 and repopulating %d items took %%0.2f milliseconds" % (olv.GetItemCount()+1000))
+        self._timeCall(
+            func,
+            f"Virtually adding 1000 and repopulating {olv.GetItemCount()+1000} items took %0.2f milliseconds")
 
     def DoSelectAll(self, olv):
-        self._timeCall(olv.SelectAll, "Selecting all %d items took %%0.2f milliseconds" % olv.GetItemCount())
+        self._timeCall(
+            olv.SelectAll,
+            f"Selecting all {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def DoSelectU2(self, olv):
         def func():
             objs = [x for x in olv.modelObjects if x.artist == "U2"]
             olv.SelectObjects(objs)
-        self._timeCall(func, "Selecting U2's items out of %d items took %%0.2f milliseconds" % olv.GetItemCount())
+        self._timeCall(
+            func,
+            f"Selecting U2's items out of {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def DoSelectNone(self, olv):
-        self._timeCall(olv.DeselectAll, "Deselecting all %d items took %%0.2f milliseconds" % olv.GetItemCount())
+        self._timeCall(
+            olv.DeselectAll,
+            f"Deselecting all {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def DoUpdateSelected(self, olv):
         def func():
             for x in olv.GetSelectedObjects():
                 x.lastPlayed = datetime.now()
             olv.RefreshObjects(olv.GetSelectedObjects())
-        self._timeCall(func, "Updating the selected items out of %d items took %%0.2f milliseconds" % olv.GetItemCount())
+        self._timeCall(
+            func,
+            f"Updating the selected items out of {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def _timeCall(self, func, msg):
         t = clock()
