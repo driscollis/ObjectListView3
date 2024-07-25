@@ -1605,6 +1605,17 @@ class ObjectListView(wx.ListCtrl):
 
         self.SortBy(evt.GetColumn(), self.sortAscending)
 
+    def _HandleColumnRightClick(self, evt):
+        """
+        The user has right clicked on a column title. Display column in
+        original order.
+        """
+        evt.Skip()
+        self._PossibleFinishCellEdit()
+
+        # Remove all sorting
+        self.SortBy(None)
+
     def _HandleColumnDragging(self, evt):
         """
         A column is being dragged
@@ -1769,6 +1780,7 @@ class ObjectListView(wx.ListCtrl):
         Enable automatic sorting when the user clicks on a column title
         """
         self.Bind(wx.EVT_LIST_COL_CLICK, self._HandleColumnClick)
+        self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self._HandleColumnRightClick)
 
         # Install sort indicators if they don't already exist
         if self.smallImageList is None:
@@ -1781,23 +1793,31 @@ class ObjectListView(wx.ListCtrl):
         """
         Sort the items by the given column
         """
-        oldSortColumnIndex = self.sortColumnIndex
-        self.sortColumnIndex = newColumnIndex
-        self.sortAscending = ascending
-
+        if newColumnIndex is None:
+            newColumnIndex = -1
         # fire a SortEvent that can be catched by a OLV-using developer
         # who Bind() to this event
         evt = OLVEvent.SortEvent(
             self,
-            self.sortColumnIndex,
-            self.sortAscending,
+            newColumnIndex,
+            ascending,
             self.IsVirtual())
         self.GetEventHandler().ProcessEvent(evt)
         if evt.IsVetoed():
             return
 
-        if not evt.wasHandled:
-            self._SortItemsNow()
+        oldSortColumnIndex = self.sortColumnIndex
+        self.sortColumnIndex = newColumnIndex
+        self.sortAscending = ascending
+
+        if newColumnIndex == -1:
+            if oldSortColumnIndex == -1:
+                return
+            if not evt.wasHandled:
+                self.RepopulateList()
+        else:
+            if not evt.wasHandled:
+                self._SortItemsNow()
 
         self._UpdateColumnSortIndicators(
             self.sortColumnIndex,
