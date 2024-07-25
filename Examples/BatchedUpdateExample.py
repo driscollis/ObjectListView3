@@ -109,12 +109,12 @@ class MyFrame(wx.Frame):
             """
             for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
                 if byteCount >= cutoff:
-                    return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                    return f"{(byteCount * 1.0 / cutoff):.1f} {label}"
 
             if byteCount == 1:
                 return "1 byte"
             else:
-                return "%d bytes" % byteCount
+                return f"{byteCount} bytes"
 
         self.olv.SetColumns([
             ColumnDefn("Path", "left", 150, "GetPath"),
@@ -190,8 +190,8 @@ class MyFrame(wx.Frame):
                 wx.CallAfter(self.olv.AddObjects, stat.children)
                 wx.CallAfter(self.olv.RefreshObjects, stat.SelfPlusAncestors())
                 #wx.SafeYield()
-        #for x in stats:
-        #    print x.GetPath(), x.CountAllDirectories(), x.CountAllFiles(), x.SizeAllFiles(), x.ElapsedScanTime()
+        # for x in stats:
+        #     print(x.GetPath(), x.CountAllDirectories(), x.CountAllFiles(), x.SizeAllFiles(), x.ElapsedScanTime())
         backgroundProcess.stats = stats
 
     def DoneWalking(self, backgroundProcess):
@@ -201,8 +201,9 @@ class MyFrame(wx.Frame):
         else:
             backgroundProcess.end = time.clock()
             self.olv.SetObjects(backgroundProcess.stats)
-            self.statusbar.SetStatusText("%d directories scanned in %.2f seconds" %
-                                         (len(backgroundProcess.stats), backgroundProcess.end - backgroundProcess.start))
+            self.statusbar.SetStatusText(
+                f"{len(backgroundProcess.stats)} directories scanned in "
+                f"{(backgroundProcess.end - backgroundProcess.start):.2f} seconds")
         self.backgroundProcess = None
 
 

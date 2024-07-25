@@ -60,12 +60,12 @@ class MyFrame(wx.Frame):
             """
             for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
                 if byteCount >= cutoff:
-                    return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                    return f"{(byteCount * 1.0 / cutoff):.1f} {label}")
 
             if byteCount == 1:
                 return "1 byte"
             else:
-                return "%d bytes" % byteCount
+                return f"{byteCount} bytes"
 
         self.myOlv.SetColumns([
             ColumnDefn("Title", "left", 120, "title", imageGetter=musicImage),
@@ -77,8 +77,8 @@ class MyFrame(wx.Frame):
         self.myOlv.SetObjects(self.songs)
 
 if __name__ == '__main__':
-    print("Using {} ({}) from {}".format(OLV.__name__, OLV.__version__, OLV.__path__))
+    print(f"Using {OLV.__name__} ({OLV.__version__}) from {OLV.__path}.")
     app = wx.App()
-    frame = MyFrame(None, -1, "{} ({}) Simple Example 2".format(OLV.__name__, OLV.__version__))
+    frame = MyFrame(None, -1, f"{OLV.__name__} ({OLV.__version__}) Simple Example 2")
     frame.Show()
     app.MainLoop()

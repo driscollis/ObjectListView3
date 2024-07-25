@@ -59,12 +59,12 @@ class MyFrame(wx.Frame):
             """
             for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
                 if byteCount >= cutoff:
-                    return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                    return f"{(byteCount * 1.0 / cutoff):.1f} {label}")
 
             if byteCount == 1:
                 return "1 byte"
             else:
-                return "%d bytes" % byteCount
+                return f"{byteCount} bytes"
 
         def lastPlayedGroupKey(track):
             """

@@ -1255,8 +1255,7 @@ class ObjectListView(wx.ListCtrl):
         The rect returned takes scroll position into account, so negative x and y are
         possible.
         """
-        # print "GetSubItemRect(self, %d, %d, %d):" % (rowIndex, subItemIndex,
-        # flag)
+        # print(f"GetSubItemRect(self, {rowIndex}, {subItemIndex}%d, {flag}):")
 
         # Linux doesn't handle wx.LIST_RECT_LABEL flag. So we always get
         # the whole bounds then par it down to the cell we want
@@ -1288,7 +1287,7 @@ class ObjectListView(wx.ListCtrl):
                     rect[0] += imageWidth
                     rect[2] -= imageWidth
 
-        # print "rect=%s" % rect
+        # print(f"rect={rect}")
         return rect
 
     def HitTestSubItem(self, pt):
@@ -1450,8 +1449,7 @@ class ObjectListView(wx.ListCtrl):
 
         #self.__rows = 0
         self._FindByTyping(searchColumn, self.searchPrefix)
-        # print "Considered %d rows in %2f secs" % (self.__rows, time.time() -
-        # timeNow)
+        # print(f"Considered {self.__rows} rows in {(time.time() - timeNow):2f} secs")
 
         return True
 
@@ -2432,7 +2430,7 @@ class AbstractVirtualObjectListView(ObjectListView):
         #    self.cacheHit += 1
         # else:
         #    self.cacheMiss += 1
-        # print "hit: %d / miss: %d" % (self.cacheHit, self.cacheMiss)
+        # print(f"hit: {self.cacheHit} / miss: {self.cacheMiss}")
 
         # Cache the last result (the hit rate is normally good: 5-10 hits to 1
         # miss)

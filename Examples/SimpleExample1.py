@@ -48,7 +48,7 @@ class MyFrame(wx.Frame):
         self.myOlv.SetObjects(self.songs)
 
 if __name__ == '__main__':
-    print('Using {} ({}) from {}.'.format(OLV.__name__, OLV.__version__, OLV.__path__))
+    print(f"Using {OLV.__name__} ({OLV.__version__}) from {OLV.__path}.")
     app = wx.App()
     frame = MyFrame(None, -1, "ObjectListView Simple Example1")
     frame.Show()
