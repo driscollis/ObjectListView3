@@ -7,10 +7,9 @@ import wx
 import sys
 sys.path.append("..")
 
-import ObjectListView as OLV
-from ObjectListView import ObjectListView, ColumnDefn
+import ObjectListView3 as OLV                                       # noqa: E402
 
-import ExampleModel
+import ExampleModel                                                 # noqa: E402
 
 class MyFrame(wx.Frame):
     def __init__(self, *args, **kwds):
@@ -31,7 +30,7 @@ class MyFrame(wx.Frame):
         sizer_1.Add(panel, 1, wx.ALL|wx.EXPAND)
         self.SetSizer(sizer_1)
 
-        self.myOlv = ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.myOlv = OLV.ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
         sizer_2.Add(self.myOlv, 1, wx.ALL|wx.EXPAND, 4)
         panel.SetSizer(sizer_2)
@@ -40,10 +39,10 @@ class MyFrame(wx.Frame):
 
     def InitObjectListView(self):
         self.myOlv.SetColumns([
-            ColumnDefn("Title", "left", 120, "title"),
-            ColumnDefn("Size (MB)", "center", 100, "GetSizeInMb", stringConverter="%.1f"),
-            ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
-            ColumnDefn("Rating", "center", 100, "rating")
+            OLV.ColumnDefn("Title", "left", 120, "title"),
+            OLV.ColumnDefn("Size (MB)", "center", 100, "GetSizeInMb", stringConverter="%.1f"),
+            OLV.ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
+            OLV.ColumnDefn("Rating", "center", 100, "rating")
         ])
         self.myOlv.SetObjects(self.songs)
 

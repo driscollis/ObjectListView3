@@ -17,7 +17,6 @@ This example shows how to use a BatchedUpdate adapter.
 
 """
 
-import datetime
 import os
 import os.path
 import threading
@@ -28,10 +27,9 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView import FastObjectListView, ObjectListView, ColumnDefn, BatchedUpdate
+from ObjectListView3 import (                                       # noqa: E402
+    FastObjectListView, ColumnDefn, BatchedUpdate)
 
-# We store our images as python code
-import ExampleImages
 
 class MyFrame(wx.Frame):
 
@@ -95,7 +93,7 @@ class MyFrame(wx.Frame):
         self.scSeconds.SetValue(2)
         self.tcRoot.SetPath(wx.StandardPaths.Get().GetDocumentsDir())
 
-        # OK, This is the whole point of the example. Wrap the ObjectListView in a batch updater
+        # OK, This is the whole point of the example. Wrap the FastObjectListView in a batch updater
         self.olv = BatchedUpdate(self.olv, 2)
 
     def InitModel(self):
@@ -146,7 +144,7 @@ class MyFrame(wx.Frame):
                 if isinstance(self.olv, BatchedUpdate):
                     self.olv.updatePeriod = self.scSeconds.GetValue()
                 else:
-                    self.olv = BatchedUpdate(olv, self.scSeconds.GetValue())
+                    self.olv = BatchedUpdate(self.olv, self.scSeconds.GetValue())
             else:
                 if isinstance(self.olv, BatchedUpdate):
                     self.olv = self.olv.objectListView
@@ -163,16 +161,16 @@ class MyFrame(wx.Frame):
         #    self.tcRoot.SetBackgroundColour(wx.Colour(255, 255, 0))
 
     def Walker(self, backgroundProcess):
-        backgroundProcess.start = time.clock()
+        backgroundProcess.start = time.perf_counter()
         backgroundProcess.stats = list()
         stats = [DirectoryStats(None, backgroundProcess.path)]
         wx.CallAfter(self.olv.SetObjects, stats)
         for stat in stats:
             if backgroundProcess.isCancelled():
                 return
-            stat.startScan = time.clock()
+            stat.startScan = time.perf_counter()
             names = os.listdir(stat.GetPath())
-            names.sort(key=unicode.lower)
+            names.sort(key=str.lower)
             for name in names:
                 if backgroundProcess.isCancelled():
                     return
@@ -185,7 +183,7 @@ class MyFrame(wx.Frame):
                         stat.sizeFiles += os.path.getsize(subPath)
                     except WindowsError:
                         pass
-            stat.endScan = time.clock()
+            stat.endScan = time.perf_counter()
             if not backgroundProcess.isCancelled():
                 wx.CallAfter(self.olv.AddObjects, stat.children)
                 wx.CallAfter(self.olv.RefreshObjects, stat.SelfPlusAncestors())
@@ -199,7 +197,7 @@ class MyFrame(wx.Frame):
         if backgroundProcess.isCancelled():
             self.statusbar.SetStatusText("Tree walk was cancelled")
         else:
-            backgroundProcess.end = time.clock()
+            backgroundProcess.end = time.perf_counter()
             self.olv.SetObjects(backgroundProcess.stats)
             self.statusbar.SetStatusText(
                 f"{len(backgroundProcess.stats)} directories scanned in "

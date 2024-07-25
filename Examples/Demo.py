@@ -17,10 +17,10 @@ __date__ = "24 July 2008"
 __version__ = "1.1"
 
 
-from datetime import datetime, time
+import datetime
 import os
 import random
-from time import clock, strptime
+import time
 
 import wx
 import wx.lib.colourdb as colourdb
@@ -29,12 +29,13 @@ import sys
 sys.path.append("..")
 #sys.path.append("c:/jpp/code/python/ObjectListView/trunk")
 
-from ObjectListView import ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn
-from ObjectListView import EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry
-from ObjectListView import ListCtrlPrinter, ReportFormat
-from ObjectListView import Filter
+from ObjectListView3 import (                                       # noqa: E402
+    ObjectListView, VirtualObjectListView, FastObjectListView, GroupListView, ColumnDefn,
+    EVT_CELL_EDIT_STARTING, EVT_CELL_EDIT_FINISHING, CellEditorRegistry,
+    ListCtrlPrinter, ReportFormat,
+    Filter)
 
-import OwnerDrawnEditor
+import OwnerDrawnEditor                                             # noqa: E402
 
 # begin wxGlade: extracode
 # end wxGlade
@@ -673,7 +674,7 @@ class MyFrame(wx.Frame):
             Track(title="Explode", artist="Nelly Furtado", size=4.1, album="Folklore", genre="Pop", rating=80, duration="3:44", lastPlayed="15/03/2008 6:53"),
             Track(title="Try", artist="Nelly Furtado", size=4.9, album="Folklore", genre="Pop", rating=80, duration="4:39", lastPlayed="15/03/2008 11:49"),
             Track(title="Fresh off the Boat", artist="Nelly Furtado", size=3.7, album="Folklore", genre="Pop", rating=60, duration="3:16", lastPlayed="22/02/2008 12:49"),
-            Track(title=u"ForÃ§a", artist="Nelly Furtado", size=4, album="Folklore", genre="Pop", rating=40, duration="3:40", lastPlayed="22/02/2008 12:53"),
+            Track(title="ForÃ§a", artist="Nelly Furtado", size=4, album="Folklore", genre="Pop", rating=40, duration="3:40", lastPlayed="22/02/2008 12:53"),
             Track(title="The Grass Is Green", artist="Nelly Furtado", size=4.2, album="Folklore", genre="Pop", rating=40, duration="3:50", lastPlayed="22/02/2008 12:57"),
             Track(title="Picture Perfect", artist="Nelly Furtado", size=5.5, album="Folklore", genre="Pop", rating=40, duration="5:15", lastPlayed="19/01/2008 12:08"),
             Track(title="Saturdays", artist="Jarvis Church/Nelly Furtado", size=2.6, album="Folklore", genre="Pop", rating=40, duration="2:05", lastPlayed="7/01/2008 7:33"),
@@ -842,8 +843,8 @@ class MyFrame(wx.Frame):
         for x in self.dataObjects:
             # Convert the 'duration' and 'lastPlayed' attributes into a time() and a datetime() respectively
             minsAndSeconds = x.duration.split(":")
-            x.duration = time(minute=int(minsAndSeconds[0]), second=int(minsAndSeconds[1]))
-            x.lastPlayed = datetime(*(strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
+            x.duration = datetime.time(minute=int(minsAndSeconds[0]), second=int(minsAndSeconds[1]))
+            x.lastPlayed = datetime.datetime(*(time.strptime(x.lastPlayed, "%d/%m/%Y %H:%M")[0:6]))
 
             # Give some tracks a dark colour that can be used for the text
             x.trackColour = random.choice(colours)
@@ -1174,27 +1175,29 @@ class MyFrame(wx.Frame):
             f"Updating the selected items out of {olv.GetItemCount()} items took %0.2f milliseconds")
 
     def _timeCall(self, func, msg):
-        t = clock()
+        t = time.perf_counter()
         simpleTiming = True
         if simpleTiming:
             func()
         else:
             self._profileCall(func, msg)
-        statusMsg = msg % ((clock()-t)*1000)
+        statusMsg = msg % ((time.perf_counter()-t)*1000)
         self.frame_1_statusbar.SetStatusText(statusMsg, 0)
 
     def _profileCall(self, func, msg):
         self.frame_1_statusbar.SetStatusText("Starting profile", 0)
-        t = clock()
+        t = time.perf_counter()
 
-        import __builtin__, cProfile, pstats
-        __builtin__.__dict__["myFunctionToProfile"] = func
+        import builtins
+        import cProfile
+        import pstats
+        builtins.__dict__["myFunctionToProfile"] = func
         cProfile.run("myFunctionToProfile()", "app.prof")
 
         stats = pstats.Stats("app.prof")
         stats.strip_dirs()
         stats.sort_stats('time', 'calls')
-        print(msg % ((clock()-t)*1000))
+        print(msg % ((time.perf_counter()-t)*1000))
         stats.print_stats(30)
         os.remove("app.prof")
 

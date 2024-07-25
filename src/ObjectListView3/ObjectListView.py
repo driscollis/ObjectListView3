@@ -253,7 +253,7 @@ class ObjectListView(wx.ListCtrl):
         self.selectionBeforeCellEdit = []
         self.checkStateColumn = None
         self.handleStandardKeys = True
-        self.searchPrefix = u""
+        self.searchPrefix = ""
         self.whenLastTypingEvent = 0
         self.filter = None
         self.objectToIndexMap = None
@@ -1411,7 +1411,7 @@ class ObjectListView(wx.ListCtrl):
             return False
 
         if evt.GetKeyCode() in (wx.WXK_BACK, wx.WXK_DELETE):
-            self.searchPrefix = u""
+            self.searchPrefix = ""
             return True
 
         # On which column are we going to compare values? If we should search on the
@@ -4109,7 +4109,7 @@ class BatchedUpdate(object):
 
     def __init__(self, objectListView, updatePeriod=0):
         self.objectListView = objectListView  # Must not be None
-        self.updatePeriod = updatePeriod
+        self.updatePeriod = int(updatePeriod * 1e9)     # Convert s to ns
 
         self.objectListView.Bind(wx.EVT_IDLE, self._HandleIdle)
 
@@ -4117,7 +4117,7 @@ class BatchedUpdate(object):
         self.objectsToAdd = list()
         self.objectsToRefresh = list()
         self.objectsToRemove = list()
-        self.freezeUntil = 0
+        self.freezeUntil = time.process_time_ns() + self.updatePeriod
 
     def __getattr__(self, name):
         """
@@ -4131,9 +4131,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be displayed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RepopulateList()
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.newModelObjects = self.objectListView.modelObjects
@@ -4146,9 +4146,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be displayed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.SetObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.newModelObjects = modelObjects
@@ -4171,9 +4171,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be added when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.AddObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         # TODO: We should check that none of the model objects is already in
@@ -4195,9 +4195,9 @@ class BatchedUpdate(object):
         """
         Refresh the information displayed about the given model objects
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RefreshObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.objectsToRefresh.extend(modelObjects)
@@ -4212,9 +4212,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be removed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RemoveObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.objectsToRemove.extend(modelObjects)
@@ -4235,7 +4235,7 @@ class BatchedUpdate(object):
                 self.objectsToAdd or
                 self.objectsToRefresh or
                 self.objectsToRemove):
-            if self.freezeUntil < time.clock():
+            if self.freezeUntil < time.process_time_ns():
                 self._ApplyChanges()
             else:
                 evt.RequestMore()
@@ -4260,7 +4260,7 @@ class BatchedUpdate(object):
         self.objectsToAdd = list()
         self.objectsToRemove = list()
         self.objectsToRefresh = list()
-        self.freezeUntil = time.clock() + self.updatePeriod
+        self.freezeUntil = time.process_time_ns() + self.updatePeriod
 
 #----------------------------------------------------------------------------
 # Built in images so clients don't have to do the same

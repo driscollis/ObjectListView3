@@ -467,7 +467,7 @@ class ReportEngine(object):
 
         fmt = self.GetNamedFormat("Page")
         bounds = list(self.pageBounds)
-        fmt.DrawDecorations(dc, bounds, self, over)
+        fmt.DrawDecorations(dc, RectUtils.Round(bounds), self, over)
 
     def _CreateReplaceWatermarkDecoration(self):
         """
@@ -1413,10 +1413,10 @@ class Block(object):
         """
         fmt = self.GetFormat()
         decorationBounds = fmt.SubtractPadding(bounds)
-        fmt.DrawDecorations(dc, decorationBounds, self, False)
+        fmt.DrawDecorations(dc, RectUtils.Round(decorationBounds), self, False)
         textBounds = fmt.SubtractDecorations(dc, list(decorationBounds))
         self.DrawSelf(dc, textBounds)
-        fmt.DrawDecorations(dc, decorationBounds, self, True)
+        fmt.DrawDecorations(dc, RectUtils.Round(decorationBounds), self, True)
 
     def PreDraw(self, dc, bounds):
         """
@@ -1480,7 +1480,7 @@ class Block(object):
         # Draw any image
         if image:
             y = _CalcBitmapPosition(bounds, image.Height)
-            dc.DrawBitmap(image, RectUtils.Left(bounds), y)
+            dc.DrawBitmap(image, round(RectUtils.Left(bounds)), round(y))
             RectUtils.MoveLeftBy(
                 bounds,
                 image.GetWidth() +
@@ -1491,8 +1491,8 @@ class Block(object):
             imageList.Draw(
                 imageIndex,
                 dc,
-                RectUtils.Left(bounds),
-                y,
+                round(RectUtils.Left(bounds)),
+                round(y),
                 wx.IMAGELIST_DRAW_TRANSPARENT)
             RectUtils.MoveLeftBy(
                 bounds,
@@ -1503,12 +1503,12 @@ class Block(object):
         dc.SetFont(font or self.GetFont())
         dc.SetTextForeground(color or self.GetTextColor() or wx.BLACK)
         if canWrap:
-            WordWrapRenderer.DrawString(dc, txt, bounds, alignment, valignment)
+            WordWrapRenderer.DrawString(dc, txt, RectUtils.Round(bounds), alignment, valignment)
         else:
             WordWrapRenderer.DrawTruncatedString(
                 dc,
                 txt,
-                bounds,
+                RectUtils.Round(bounds),
                 alignment,
                 valignment)
 
@@ -1787,12 +1787,12 @@ class CellBlock(Block):
             # Draw the interior dividers
             for x in combined[:-1]:
                 right = RectUtils.Right(x.cell)
-                dc.DrawLine(right, top, right, bottom)
+                dc.DrawLine(*map(round, (right, top, right, bottom)))
 
             # Draw the surrounding frame
             left = RectUtils.Left(combined[0].cell)
             right = RectUtils.Right(combined[-1].cell)
-            dc.DrawRectangle(left, top, right - left, bottom - top)
+            dc.DrawRectangle(*map(round, (left, top, right - left, bottom - top)))
 
 
 #----------------------------------------------------------------------------
@@ -2649,14 +2649,14 @@ class RectangleDecoration(Decoration):
             if self.toColor is None:
                 dc.SetPen(wx.TRANSPARENT_PEN)
                 dc.SetBrush(wx.Brush(self.color))
-                dc.DrawRectangle(*rect)
+                dc.DrawRectangle(*RectUtils.Round(rect))
             else:
-                dc.GradientFillLinear(wx.Rect(*rect), self.color, self.toColor)
+                dc.GradientFillLinear(wx.Rect(RectUtils.Round(rect)), self.color, self.toColor)
 
         if self.pen:
             dc.SetPen(self.pen)
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
-            dc.DrawRectangle(*rect)
+            dc.DrawRectangle(*RectUtils.Round(rect))
 
     def _CalculateRect(self, bounds):
         """
@@ -2749,7 +2749,7 @@ class LineDecoration(Decoration):
             pt2 = RectUtils.BottomRight(bounds)
 
         dc.SetPen(self.pen)
-        dc.DrawLine(pt1[0], pt1[1], pt2[0], pt2[1])
+        dc.DrawLine(round(pt1[0]), round(pt1[1]), round(pt2[0]), round(pt2[1]))
 
 #----------------------------------------------------------------------------
 
@@ -2792,10 +2792,10 @@ class WatermarkDecoration(Decoration):
         cx, cy = RectUtils.Center(bounds)
         w, h = dc.GetTextExtent(self.text)
 
-        x = cx - w / 2
-        y = cy - h / 2 + (w / 2 * math.sin(math.radians(self.angle)))
+        x = round(cx - w / 2)
+        y = round(cy - (h + w * math.sin(math.radians(self.angle))) / 2)
 
-        dc.DrawRotatedText(self.text, x, y, self.angle)
+        dc.DrawRotatedText(self.text, x, y, self.angle) 
 
 #----------------------------------------------------------------------------
 
@@ -2870,7 +2870,7 @@ class ImageDecoration(Decoration):
                     mdc, xsrc=0, ysrc=0, useMask=True)
             mdc.SelectObject(wx.NullBitmap)
         else:
-            dc.DrawBitmap(self.bitmap, x, y, True)
+            dc.DrawBitmap(self.bitmap, round(x), round(y), True)
 
 
 #----------------------------------------------------------------------------
@@ -2901,6 +2901,10 @@ class RectUtils:
 
     #-------------------------------------------------------------------------
     # Accessing
+
+    @staticmethod
+    def Round(r):
+        return [round(x) for x in r]
 
     @staticmethod
     def Left(r):
@@ -3009,7 +3013,7 @@ class RectUtils:
         try:
             delta[0]  # is it indexable?
             return RectUtils.InsetRect(r, delta)
-        except IndexError:
+        except (TypeError, IndexError):
             return RectUtils.InsetRect(r, (delta, delta, delta, delta))
 
     @staticmethod

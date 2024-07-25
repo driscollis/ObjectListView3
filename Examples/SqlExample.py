@@ -27,11 +27,9 @@ but the updating is simple-minded and will be confused by anything complicated.
 
 """
 
-import datetime
 import os
 import os.path
 import re
-import time
 import wx
 import sqlite3 as sqlite
 
@@ -39,9 +37,11 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-from ObjectListView import ObjectListView, FastObjectListView, ColumnDefn, EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING
+from ObjectListView3 import (                                       # noqa: E402
+    ObjectListView, FastObjectListView, ColumnDefn,
+    EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING)
 
-import ExampleModel
+import ExampleModel                                                 # noqa: E402
 
 class MyFrame(wx.Frame):
 
@@ -74,14 +74,12 @@ class MyFrame(wx.Frame):
         connection.execute(CREATE_STMT)
         connection.commit()
 
-        start = time.clock()
         i = 0
         while i < NUMBER_OF_ROWS:
             for x in ExampleModel.GetTracks():
                 connection.execute(INSERT_STMT, [i, x.title + str(i), x.artist, x.album, x.sizeInBytes, x.rating])
                 i += 1
         connection.commit()
-        # print(f"Building database of {NUMBER_OF_ROWS} rows took {(time.clock() - start):2f} seconds.")
 
         return connection
 
@@ -120,8 +118,9 @@ class MyFrame(wx.Frame):
             self.myOlv.SetEmptyListMsg("Executing statement...")
             self.DoSelect(self.tcSql.GetValue())
             self.CalculatePrimaryKey(self.tcSql.GetValue())
-        except sqlite.Error, e:
-            self.myOlv.SetEmptyListMsg(f"Error: {e.args[0]}")
+        except sqlite.Error as e:
+            self.myOlv.SetEmptyListMsg("Error: %s" % e.args[0])
+
         self.UpdateListEditability()
 
     def HandleCellEditStarting(self, evt):
@@ -143,9 +142,9 @@ class MyFrame(wx.Frame):
         try:
             self.connection.execute(stmt, (evt.rowModel[evt.subItemIndex], evt.rowModel[self.primaryKeyIndex]))
             self.connection.commit()
-        except sqlite.Error, e:
-            wx.MessageBox(
-                f"Error when updating: {e.args[0]}.\nStatement: {stmt}")
+
+        except sqlite.Error as e:
+            wx.MessageBox("Error when updating: %s.\nStatement: %s" % (e.args[0], stmt))
 
     #----------------------------------------------------------------------------
     # Commands
