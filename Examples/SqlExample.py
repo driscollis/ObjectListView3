@@ -120,6 +120,7 @@ class MyFrame(wx.Frame):
             self.CalculatePrimaryKey(self.tcSql.GetValue())
         except sqlite.Error as e:
             self.myOlv.SetEmptyListMsg("Error: %s" % e.args[0])
+
         self.UpdateListEditability()
 
     def HandleCellEditStarting(self, evt):
@@ -134,10 +135,14 @@ class MyFrame(wx.Frame):
         if evt.userCancelled:
             return
 
-        stmt = "UPDATE %s SET %s=? WHERE %s = ?" % (self.tableName, self.myOlv.columns[evt.subItemIndex].title, self.primaryKey)
+        stmt = (
+            f"UPDATE {self.tableName} "
+            f"SET {self.myOlv.columns[evt.subItemIndex].title}=? "
+            f"WHERE {self.primaryKey} = ?"
         try:
             self.connection.execute(stmt, (evt.rowModel[evt.subItemIndex], evt.rowModel[self.primaryKeyIndex]))
             self.connection.commit()
+
         except sqlite.Error as e:
             wx.MessageBox("Error when updating: %s.\nStatement: %s" % (e.args[0], stmt))
 
@@ -165,10 +170,12 @@ class MyFrame(wx.Frame):
 
         if self.primaryKey:
             if self.primaryKey in [x.title for x in self.myOlv.columns]:
-                self.stMsg.SetLabel("Editable: True.  Primary key: %s." % self.primaryKey)
+                self.stMsg.SetLabel(
+                    f"Editable: True.  Primary key: {self.primaryKey}.")
                 self.myOlv.cellEditMode = ObjectListView.CELLEDIT_DOUBLECLICK
             else:
-                self.stMsg.SetLabel("Editable: False.  Primary key ('%s') not in columns." % self.primaryKey)
+                self.stMsg.SetLabel(
+                    f"Editable: False.  Primary key ('{self.primaryKey}') not in columns.")
         else:
             self.stMsg.SetLabel("Editable: False.  Could not calculate primary key.")
 
@@ -187,13 +194,13 @@ class MyFrame(wx.Frame):
 
         self.tableName = match.group(1)
         cur = self.connection.cursor()
-        cur.execute("pragma index_list(%s)" % self.tableName)
+        cur.execute(f"pragma index_list({self.tableName})")
         # Collect the index names of unique indicies
         uniqueIndexNames = [x[1] for x in cur.fetchall() if x[2]]
         if not uniqueIndexNames:
             return
 
-        cur.execute("pragma index_info(%s)" % uniqueIndexNames[0])
+        cur.execute(f"pragma index_info({uniqueIndexNames[0]})")
         self.primaryKey = cur.fetchone()[2]
         self.primaryKeyIndex = [x.title for x in self.myOlv.columns].index(self.primaryKey)
 

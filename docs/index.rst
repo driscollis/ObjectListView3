@@ -22,7 +22,7 @@ Without wasting my time, just tell me what it does!
 OK, here's the bullet point feature list:
 
 * Automatically transforms a collection of model objects into a fully functional wx.ListCtrl.
-* Automatically sorts rows.
+* Automatically sorts rows by clicking on the column header (right-click cancels sorting).
 * Easily :ref:`edit the cell values <cell-editing-label>`.
 * Supports all ListCtrl views (report, list, large and small icons).
 * Columns can be fixed-width, have a minimum and/or maximum width, or be space-filling (:ref:`Column Widths <column-widths>`)

@@ -181,6 +181,7 @@ class MyFrame(wx.Frame):
         print("Sorting took %2f seconds." % (time.perf_counter() - start))
 
 
+
 if __name__ == '__main__':
     print('Using {} ({}) from {}.'.format(OLV.__name__, OLV.__version__, OLV.__path__))
     app = wx.App()

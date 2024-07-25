@@ -1547,7 +1547,7 @@ class TextBlock(Block):
             return False
 
     def GetText(self):
-        return "Missing GetText() in class %s" % self.__class__.__name__
+        return f"Missing GetText() in class {self.__class__.__name__}"
 
     def GetSubstitutedText(self):
         """
@@ -2816,12 +2816,12 @@ class ImageDecoration(Decoration):
             over=True):
         """
         Default constructor
-        
+
         :param `image`: must be :class:`wx.Image` or :class:`wx.Bitmap`
         :param `horizontalAlign`: alignment flag
         :param `verticalAlign`: alignment flag
         :param boolean `over`: True to overprint
-        
+
         """
         self.horizontalAlign = horizontalAlign
         self.verticalAlign = verticalAlign
@@ -2868,7 +2868,7 @@ class ImageDecoration(Decoration):
             mdc.SelectObject(self.bitmap)
             dc.Blit(x, y, self.bitmap.GetWidth(), self.bitmap.GetHeight(),
                     mdc, xsrc=0, ysrc=0, useMask=True)
-            mdc.SelectObject(wx.NullBitmap)         
+            mdc.SelectObject(wx.NullBitmap)
         else:
             dc.DrawBitmap(self.bitmap, round(x), round(y), True)
 
@@ -2885,8 +2885,8 @@ class Bucket(object):
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        strs = ["%s=%r" % kv for kv in self.__dict__.items()]
-        return "Bucket(" + ", ".join(strs) + ")"
+        strs = [f"{kv!s}={kv!r}" for kv in self.__dict__.items()]
+        return f"Bucket({', '.join(strs)})"
 
 #----------------------------------------------------------------------------
 

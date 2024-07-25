@@ -734,7 +734,7 @@ class ObjectListView(wx.ListCtrl):
                 horizDelta = boundsRight - self.GetSize()[0] + (
                     self.GetSize()[0] / 4)
             if wx.Platform == "__WXMSW__":
-                self.ScrollList(horizDelta, 0)
+                self.ScrollList(int(horizDelta), 0)
             else:
                 return None
 
@@ -1255,8 +1255,7 @@ class ObjectListView(wx.ListCtrl):
         The rect returned takes scroll position into account, so negative x and y are
         possible.
         """
-        # print "GetSubItemRect(self, %d, %d, %d):" % (rowIndex, subItemIndex,
-        # flag)
+        # print(f"GetSubItemRect(self, {rowIndex}, {subItemIndex}%d, {flag}):")
 
         # Linux doesn't handle wx.LIST_RECT_LABEL flag. So we always get
         # the whole bounds then par it down to the cell we want
@@ -1288,7 +1287,7 @@ class ObjectListView(wx.ListCtrl):
                     rect[0] += imageWidth
                     rect[2] -= imageWidth
 
-        # print "rect=%s" % rect
+        # print(f"rect={rect}")
         return rect
 
     def HitTestSubItem(self, pt):
@@ -1450,8 +1449,7 @@ class ObjectListView(wx.ListCtrl):
 
         #self.__rows = 0
         self._FindByTyping(searchColumn, self.searchPrefix)
-        # print "Considered %d rows in %2f secs" % (self.__rows, time.time() -
-        # timeNow)
+        # print(f"Considered {self.__rows} rows in {(time.time() - timeNow):2f} secs")
 
         return True
 
@@ -1606,6 +1604,17 @@ class ObjectListView(wx.ListCtrl):
             self.sortAscending = True
 
         self.SortBy(evt.GetColumn(), self.sortAscending)
+
+    def _HandleColumnRightClick(self, evt):
+        """
+        The user has right clicked on a column title. Display column in
+        original order.
+        """
+        evt.Skip()
+        self._PossibleFinishCellEdit()
+
+        # Remove all sorting
+        self.SortBy(None)
 
     def _HandleColumnDragging(self, evt):
         """
@@ -1771,6 +1780,7 @@ class ObjectListView(wx.ListCtrl):
         Enable automatic sorting when the user clicks on a column title
         """
         self.Bind(wx.EVT_LIST_COL_CLICK, self._HandleColumnClick)
+        self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self._HandleColumnRightClick)
 
         # Install sort indicators if they don't already exist
         if self.smallImageList is None:
@@ -1783,23 +1793,31 @@ class ObjectListView(wx.ListCtrl):
         """
         Sort the items by the given column
         """
-        oldSortColumnIndex = self.sortColumnIndex
-        self.sortColumnIndex = newColumnIndex
-        self.sortAscending = ascending
-
+        if newColumnIndex is None:
+            newColumnIndex = -1
         # fire a SortEvent that can be catched by a OLV-using developer
         # who Bind() to this event
         evt = OLVEvent.SortEvent(
             self,
-            self.sortColumnIndex,
-            self.sortAscending,
+            newColumnIndex,
+            ascending,
             self.IsVirtual())
         self.GetEventHandler().ProcessEvent(evt)
         if evt.IsVetoed():
             return
 
-        if not evt.wasHandled:
-            self._SortItemsNow()
+        oldSortColumnIndex = self.sortColumnIndex
+        self.sortColumnIndex = newColumnIndex
+        self.sortAscending = ascending
+
+        if newColumnIndex == -1:
+            if oldSortColumnIndex == -1:
+                return
+            if not evt.wasHandled:
+                self.RepopulateList()
+        else:
+            if not evt.wasHandled:
+                self._SortItemsNow()
 
         self._UpdateColumnSortIndicators(
             self.sortColumnIndex,
@@ -1825,7 +1843,7 @@ class ObjectListView(wx.ListCtrl):
                 return locale.strcoll(value1.lower(), value2.lower())
             except Exception:
                 # protect for unorderable types in Py3
-                if type(value1) == type(value2) and value2 is not None:
+                if type(value1) is type(value2) and value2 is not None:
                     return (value1 > value2) - (value1 < value2)
                 else:
                     aS = str(value1)
@@ -2432,7 +2450,7 @@ class AbstractVirtualObjectListView(ObjectListView):
         #    self.cacheHit += 1
         # else:
         #    self.cacheMiss += 1
-        # print "hit: %d / miss: %d" % (self.cacheHit, self.cacheMiss)
+        # print(f"hit: {self.cacheHit} / miss: {self.cacheMiss}")
 
         # Cache the last result (the hit rate is normally good: 5-10 hits to 1
         # miss)
@@ -3830,7 +3848,7 @@ class ColumnDefn(object):
         try:
             modelObject[munger] = value
             return
-        except IndexError:
+        except (IndexError, TypeError):
             pass
 
         # Is munger the name of some slot in the modelObject?
@@ -3901,7 +3919,7 @@ class ColumnDefn(object):
         # Try dictionary-like indexing
         try:
             return modelObject[munger]
-        except IndexError:
+        except (IndexError, KeyError, TypeError):
             return None
 
     #-------------------------------------------------------------------------
