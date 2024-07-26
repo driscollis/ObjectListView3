@@ -3898,15 +3898,18 @@ class ColumnDefn(object):
 
         # Try attribute access
         try:
-            attr = getattr(modelObject, munger, None)
-            if attr is not None:
-                try:
-                    return attr()
-                except TypeError:
-                    return attr
-        except TypeError:
-            # Happens when munger is not a string
+            attr = getattr(modelObject, munger)
+        except (AttributeError, TypeError):
+            # Happens when
+            # 1. attribute does not exist
+            # 2. munger is not a string
             pass
+        else:
+            try:
+                return attr()
+            except TypeError:
+                # Happens when attribute is not callable
+                return attr
 
         # Use the callable directly, if possible.
         # In accordance with Guido's rules for Python 3, we just call it and catch the
@@ -3920,6 +3923,10 @@ class ColumnDefn(object):
         try:
             return modelObject[munger]
         except (IndexError, KeyError, TypeError):
+            # Happens when
+            # 1. modelObject is a list and munger index is out of range
+            # 2. modelObject is a dictionary and munger key does not exist
+            # 3. modelObject is a list and munger is not an integer
             return None
 
     #-------------------------------------------------------------------------
