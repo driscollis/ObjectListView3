@@ -17,3 +17,6 @@ jobs:
       - name: Run Ruff
         run: ruff check --output-format=github .
         continue-on-error: false
+      - name: Run Ruff format
+        run: ruff format --check .
+        continue-on-error: false
