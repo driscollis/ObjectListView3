@@ -26,7 +26,6 @@ You can change the size of the temporary database by
 changing NUMBER_OF_ROWS.
 """
 
-import datetime
 import os
 import os.path
 import time
@@ -37,10 +36,10 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-from ObjectListView import VirtualObjectListView, ColumnDefn, EVT_SORT
+import ObjectListView3 as OLV                                       # noqa: E402
 
 # We store our images as python code
-import ExampleImages
+import ExampleImages                                                # noqa: E402
 
 class MyFrame(wx.Frame):
 
@@ -63,7 +62,7 @@ class MyFrame(wx.Frame):
         wx.CallLater(1, self.InitModel)
 
     def InitModel(self):
-        start = time.clock()
+        start = time.perf_counter()
         path = os.path.join(wx.StandardPaths.Get().GetTempDir(), "VirtualListExample.sqlite")
         if os.path.exists(path):
             os.remove(path)
@@ -110,7 +109,7 @@ class MyFrame(wx.Frame):
         result = cur.fetchone()
         self.myOlv.SetItemCount(int(result[0]))
 
-        print "Building database %d rows of took %2f seconds." % (self.myOlv.GetItemCount(), time.clock() - start)
+        print("Building database %d rows of took %2f seconds." % (self.myOlv.GetItemCount(), time.perf_counter() - start))
 
     def InitWidgets(self):
         panel = wx.Panel(self, -1)
@@ -118,7 +117,7 @@ class MyFrame(wx.Frame):
         sizer_1.Add(panel, 1, wx.ALL|wx.EXPAND)
         self.SetSizer(sizer_1)
 
-        self.myOlv = VirtualObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.myOlv = OLV.VirtualObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
         sizer_2.Add(self.myOlv, 1, wx.ALL|wx.EXPAND, 4)
         panel.SetSizer(sizer_2)
@@ -126,9 +125,9 @@ class MyFrame(wx.Frame):
         self.Layout()
 
     def InitObjectListView(self):
-        groupImage = self.myOlv.AddImages(ExampleImages.getGroup16Bitmap(), ExampleImages.getGroup32Bitmap())
-        musicImage = self.myOlv.AddImages(ExampleImages.getMusic16Bitmap(), ExampleImages.getMusic32Bitmap())
-        userImage = self.myOlv.AddImages(ExampleImages.getUser16Bitmap(), ExampleImages.getUser32Bitmap())
+        groupImage = self.myOlv.AddImages(ExampleImages.Group16.GetBitmap(), ExampleImages.Group32.GetBitmap())
+        musicImage = self.myOlv.AddImages(ExampleImages.Music16.GetBitmap(), ExampleImages.Music32.GetBitmap())
+        userImage = self.myOlv.AddImages(ExampleImages.User16.GetBitmap(), ExampleImages.User32.GetBitmap())
 
         soloArtists = ["Nelly Furtado", "Missy Higgins", "Moby", "Natalie Imbruglia"]
         def artistImageGetter(track):
@@ -138,9 +137,9 @@ class MyFrame(wx.Frame):
                 return groupImage
 
         self.myOlv.SetColumns([
-            ColumnDefn("Title", "left", 150, "title", imageGetter=musicImage),
-            ColumnDefn("Artist", "left", 150, "artist", imageGetter=artistImageGetter),
-            ColumnDefn("Album", "center", 150, "album")
+            OLV.ColumnDefn("Title", "left", 150, "title", imageGetter=musicImage),
+            OLV.ColumnDefn("Artist", "left", 150, "artist", imageGetter=artistImageGetter),
+            OLV.ColumnDefn("Album", "center", 150, "album")
         ])
 
         # Fetch rows from the database when required
@@ -156,7 +155,7 @@ class MyFrame(wx.Frame):
 
         # We want to receive sort events for the virtual list
         self.myOlv.EnableSorting()
-        self.myOlv.Bind(EVT_SORT, self.HandleSort)
+        self.myOlv.Bind(OLV.EVT_SORT, self.HandleSort)
 
         # Let the user know that we are building the database
         self.myOlv.SetEmptyListMsg("Building database...")
@@ -167,7 +166,7 @@ class MyFrame(wx.Frame):
         """
         The user wants to sort the virtual list.
         """
-        start = time.clock()
+        start = time.perf_counter()
 
         columnName = evt.objectListView.columns[evt.sortColumnIndex].valueGetter
         if evt.sortAscending:
@@ -179,13 +178,14 @@ class MyFrame(wx.Frame):
         self.reorderList = [x[0] for x in cur.fetchall()]
         self.myOlv.RefreshObjects()
 
-        print "Sorting took %2f seconds." % (time.clock() - start)
+        print("Sorting took %2f seconds." % (time.perf_counter() - start))
+
 
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp(0)
+    print('Using {} ({}) from {}.'.format(OLV.__name__, OLV.__version__, OLV.__path__))
+    app = wx.App()
     wx.InitAllImageHandlers()
-    frame_1 = MyFrame(None, -1, "VirtualObjectListView Example")
-    app.SetTopWindow(frame_1)
-    frame_1.Show()
+    frame = MyFrame(None, -1, "VirtualObjectListView Example")
+    frame.Show()
     app.MainLoop()

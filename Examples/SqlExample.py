@@ -27,11 +27,9 @@ but the updating is simple-minded and will be confused by anything complicated.
 
 """
 
-import datetime
 import os
 import os.path
 import re
-import time
 import wx
 import sqlite3 as sqlite
 
@@ -39,9 +37,11 @@ import sqlite3 as sqlite
 import sys
 sys.path.append("..")
 
-from ObjectListView import ObjectListView, FastObjectListView, ColumnDefn, EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING
+from ObjectListView3 import (                                       # noqa: E402
+    ObjectListView, FastObjectListView, ColumnDefn,
+    EVT_CELL_EDIT_FINISHED, EVT_CELL_EDIT_STARTING)
 
-import ExampleModel
+import ExampleModel                                                 # noqa: E402
 
 class MyFrame(wx.Frame):
 
@@ -74,14 +74,12 @@ class MyFrame(wx.Frame):
         connection.execute(CREATE_STMT)
         connection.commit()
 
-        start = time.clock()
         i = 0
         while i < NUMBER_OF_ROWS:
             for x in ExampleModel.GetTracks():
                 connection.execute(INSERT_STMT, [i, x.title + str(i), x.artist, x.album, x.sizeInBytes, x.rating])
                 i += 1
         connection.commit()
-        #print "Building database of %d rows took %2f seconds." % (NUMBER_OF_ROWS, time.clock() - start)
 
         return connection
 
@@ -120,8 +118,9 @@ class MyFrame(wx.Frame):
             self.myOlv.SetEmptyListMsg("Executing statement...")
             self.DoSelect(self.tcSql.GetValue())
             self.CalculatePrimaryKey(self.tcSql.GetValue())
-        except sqlite.Error, e:
+        except sqlite.Error as e:
             self.myOlv.SetEmptyListMsg("Error: %s" % e.args[0])
+
         self.UpdateListEditability()
 
     def HandleCellEditStarting(self, evt):
@@ -136,11 +135,15 @@ class MyFrame(wx.Frame):
         if evt.userCancelled:
             return
 
-        stmt = "UPDATE %s SET %s=? WHERE %s = ?" % (self.tableName, self.myOlv.columns[evt.subItemIndex].title, self.primaryKey)
+        stmt = (
+            f"UPDATE {self.tableName} "
+            f"SET {self.myOlv.columns[evt.subItemIndex].title}=? "
+            f"WHERE {self.primaryKey} = ?"
         try:
             self.connection.execute(stmt, (evt.rowModel[evt.subItemIndex], evt.rowModel[self.primaryKeyIndex]))
             self.connection.commit()
-        except sqlite.Error, e:
+
+        except sqlite.Error as e:
             wx.MessageBox("Error when updating: %s.\nStatement: %s" % (e.args[0], stmt))
 
     #----------------------------------------------------------------------------
@@ -167,10 +170,12 @@ class MyFrame(wx.Frame):
 
         if self.primaryKey:
             if self.primaryKey in [x.title for x in self.myOlv.columns]:
-                self.stMsg.SetLabel("Editable: True.  Primary key: %s." % self.primaryKey)
+                self.stMsg.SetLabel(
+                    f"Editable: True.  Primary key: {self.primaryKey}.")
                 self.myOlv.cellEditMode = ObjectListView.CELLEDIT_DOUBLECLICK
             else:
-                self.stMsg.SetLabel("Editable: False.  Primary key ('%s') not in columns." % self.primaryKey)
+                self.stMsg.SetLabel(
+                    f"Editable: False.  Primary key ('{self.primaryKey}') not in columns.")
         else:
             self.stMsg.SetLabel("Editable: False.  Could not calculate primary key.")
 
@@ -189,13 +194,13 @@ class MyFrame(wx.Frame):
 
         self.tableName = match.group(1)
         cur = self.connection.cursor()
-        cur.execute("pragma index_list(%s)" % self.tableName)
+        cur.execute(f"pragma index_list({self.tableName})")
         # Collect the index names of unique indicies
         uniqueIndexNames = [x[1] for x in cur.fetchall() if x[2]]
         if not uniqueIndexNames:
             return
 
-        cur.execute("pragma index_info(%s)" % uniqueIndexNames[0])
+        cur.execute(f"pragma index_info({uniqueIndexNames[0]})")
         self.primaryKey = cur.fetchone()[2]
         self.primaryKeyIndex = [x.title for x in self.myOlv.columns].index(self.primaryKey)
 

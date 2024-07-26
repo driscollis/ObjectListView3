@@ -5,6 +5,16 @@
 Change Log
 ==========
 
+2024-07-25 - Fix sorting defect, thanks to sphh
+
+2024-07-25 - Update code to use f-strings, thanks to sphh
+
+2024-07-19 - Fix all tests to make them all pass
+
+2024-07-18 - Fix test imports
+
+2024-07-12 - Add the Ruff linter to GitHub Actions and fix all lint
+
 2014-03-07 - StringConverter supports wx.DateTime, thanks to topix
 
 2014-11-18 - tests pass on Py3.4 and Phoenix 3.0.2 except the testNoAlternateColours

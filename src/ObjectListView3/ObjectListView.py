@@ -253,7 +253,7 @@ class ObjectListView(wx.ListCtrl):
         self.selectionBeforeCellEdit = []
         self.checkStateColumn = None
         self.handleStandardKeys = True
-        self.searchPrefix = u""
+        self.searchPrefix = ""
         self.whenLastTypingEvent = 0
         self.filter = None
         self.objectToIndexMap = None
@@ -1259,8 +1259,7 @@ class ObjectListView(wx.ListCtrl):
         The rect returned takes scroll position into account, so negative x and y are
         possible.
         """
-        # print "GetSubItemRect(self, %d, %d, %d):" % (rowIndex, subItemIndex,
-        # flag)
+        # print(f"GetSubItemRect(self, {rowIndex}, {subItemIndex}%d, {flag}):")
 
         # Linux doesn't handle wx.LIST_RECT_LABEL flag. So we always get
         # the whole bounds then par it down to the cell we want
@@ -1292,7 +1291,7 @@ class ObjectListView(wx.ListCtrl):
                     rect[0] += imageWidth
                     rect[2] -= imageWidth
 
-        # print "rect=%s" % rect
+        # print(f"rect={rect}")
         return rect
 
     def HitTestSubItem(self, pt):
@@ -1416,7 +1415,7 @@ class ObjectListView(wx.ListCtrl):
             return False
 
         if evt.GetKeyCode() in (wx.WXK_BACK, wx.WXK_DELETE):
-            self.searchPrefix = u""
+            self.searchPrefix = ""
             return True
 
         # On which column are we going to compare values? If we should search on the
@@ -1454,8 +1453,7 @@ class ObjectListView(wx.ListCtrl):
 
         #self.__rows = 0
         self._FindByTyping(searchColumn, self.searchPrefix)
-        # print "Considered %d rows in %2f secs" % (self.__rows, time.time() -
-        # timeNow)
+        # print(f"Considered {self.__rows} rows in {(time.time() - timeNow):2f} secs")
 
         return True
 
@@ -1610,6 +1608,17 @@ class ObjectListView(wx.ListCtrl):
             self.sortAscending = True
 
         self.SortBy(evt.GetColumn(), self.sortAscending)
+
+    def _HandleColumnRightClick(self, evt):
+        """
+        The user has right clicked on a column title. Display column in
+        original order.
+        """
+        evt.Skip()
+        self._PossibleFinishCellEdit()
+
+        # Remove all sorting
+        self.SortBy(None)
 
     def _HandleColumnDragging(self, evt):
         """
@@ -1775,6 +1784,7 @@ class ObjectListView(wx.ListCtrl):
         Enable automatic sorting when the user clicks on a column title
         """
         self.Bind(wx.EVT_LIST_COL_CLICK, self._HandleColumnClick)
+        self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self._HandleColumnRightClick)
 
         # Install sort indicators if they don't already exist
         if self.smallImageList is None:
@@ -1787,23 +1797,31 @@ class ObjectListView(wx.ListCtrl):
         """
         Sort the items by the given column
         """
-        oldSortColumnIndex = self.sortColumnIndex
-        self.sortColumnIndex = newColumnIndex
-        self.sortAscending = ascending
-
+        if newColumnIndex is None:
+            newColumnIndex = -1
         # fire a SortEvent that can be catched by a OLV-using developer
         # who Bind() to this event
         evt = OLVEvent.SortEvent(
             self,
-            self.sortColumnIndex,
-            self.sortAscending,
+            newColumnIndex,
+            ascending,
             self.IsVirtual())
         self.GetEventHandler().ProcessEvent(evt)
         if evt.IsVetoed():
             return
 
-        if not evt.wasHandled:
-            self._SortItemsNow()
+        oldSortColumnIndex = self.sortColumnIndex
+        self.sortColumnIndex = newColumnIndex
+        self.sortAscending = ascending
+
+        if newColumnIndex == -1:
+            if oldSortColumnIndex == -1:
+                return
+            if not evt.wasHandled:
+                self.RepopulateList()
+        else:
+            if not evt.wasHandled:
+                self._SortItemsNow()
 
         self._UpdateColumnSortIndicators(
             self.sortColumnIndex,
@@ -2436,7 +2454,7 @@ class AbstractVirtualObjectListView(ObjectListView):
         #    self.cacheHit += 1
         # else:
         #    self.cacheMiss += 1
-        # print "hit: %d / miss: %d" % (self.cacheHit, self.cacheMiss)
+        # print(f"hit: {self.cacheHit} / miss: {self.cacheMiss}")
 
         # Cache the last result (the hit rate is normally good: 5-10 hits to 1
         # miss)
@@ -3884,15 +3902,18 @@ class ColumnDefn(object):
 
         # Try attribute access
         try:
-            attr = getattr(modelObject, munger, None)
-            if attr is not None:
-                try:
-                    return attr()
-                except TypeError:
-                    return attr
-        except TypeError:
-            # Happens when munger is not a string
+            attr = getattr(modelObject, munger)
+        except (AttributeError, TypeError):
+            # Happens when
+            # 1. attribute does not exist
+            # 2. munger is not a string
             pass
+        else:
+            try:
+                return attr()
+            except TypeError:
+                # Happens when attribute is not callable
+                return attr
 
         # Use the callable directly, if possible.
         # In accordance with Guido's rules for Python 3, we just call it and catch the
@@ -3906,6 +3927,10 @@ class ColumnDefn(object):
         try:
             return modelObject[munger]
         except (IndexError, KeyError, TypeError):
+            # Happens when
+            # 1. modelObject is a list and munger index is out of range
+            # 2. modelObject is a dictionary and munger key does not exist
+            # 3. modelObject is a list and munger is not an integer
             return None
 
     #-------------------------------------------------------------------------
@@ -4095,7 +4120,7 @@ class BatchedUpdate(object):
 
     def __init__(self, objectListView, updatePeriod=0, keepOrder=False):
         self.objectListView = objectListView  # Must not be None
-        self.updatePeriod = updatePeriod
+        self.updatePeriod = int(updatePeriod * 1e9)     # Convert s to ns
         self.keepOrder = keepOrder
 
         self.objectListView.Bind(wx.EVT_IDLE, self._HandleIdle)
@@ -4104,7 +4129,7 @@ class BatchedUpdate(object):
         self.objectsToAdd = list()
         self.objectsToRefresh = list()
         self.objectsToRemove = list()
-        self.freezeUntil = 0
+        self.freezeUntil = time.process_time_ns() + self.updatePeriod
 
     def __getattr__(self, name):
         """
@@ -4118,9 +4143,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be displayed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RepopulateList()
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.newModelObjects = self.objectListView.modelObjects
@@ -4133,9 +4158,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be displayed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.SetObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.newModelObjects = modelObjects
@@ -4158,9 +4183,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be added when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.AddObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         # TODO: We should check that none of the model objects is already in
@@ -4182,9 +4207,9 @@ class BatchedUpdate(object):
         """
         Refresh the information displayed about the given model objects
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RefreshObjects(modelObjects)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.objectsToRefresh.extend(modelObjects)
@@ -4199,9 +4224,9 @@ class BatchedUpdate(object):
         """
         Remember the given model objects so that they can be removed when the next update cycle occurs
         """
-        if self.freezeUntil < time.clock():
+        if self.freezeUntil < time.process_time_ns():
             self.objectListView.RemoveObjects(modelObjects, keepOrder=keepOrder)
-            self.freezeUntil = time.clock() + self.updatePeriod
+            self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
         self.objectsToRemove.extend(modelObjects)
@@ -4222,7 +4247,7 @@ class BatchedUpdate(object):
                 self.objectsToAdd or
                 self.objectsToRefresh or
                 self.objectsToRemove):
-            if self.freezeUntil < time.clock():
+            if self.freezeUntil < time.process_time_ns():
                 self._ApplyChanges()
             else:
                 evt.RequestMore()
@@ -4248,7 +4273,7 @@ class BatchedUpdate(object):
         self.objectsToAdd = list()
         self.objectsToRemove = list()
         self.objectsToRefresh = list()
-        self.freezeUntil = time.clock() + self.updatePeriod
+        self.freezeUntil = time.process_time_ns() + self.updatePeriod
 
 #----------------------------------------------------------------------------
 # Built in images so clients don't have to do the same

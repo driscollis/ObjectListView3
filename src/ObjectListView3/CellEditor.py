@@ -363,15 +363,14 @@ class DateTimeEditor(BaseCellTextEditor):
         for dtFmt in self.STD_DATE_FORMATS:
             self.allDateTimeFormats.append(dtFmt)
             for timeFmt in self.STD_TIME_FORMATS:
-                self.allDateTimeFormats.append("%s %s" % (dtFmt, timeFmt))
+                self.allDateTimeFormats.append(f"{dtFmt} {timeFmt}")
 
         self.allDateTimeWithoutYearFormats = []
         for dtFmt in self.STD_DATE_WITHOUT_YEAR_FORMATS:
             self.allDateTimeWithoutYearFormats.append(dtFmt)
             for timeFmt in self.STD_TIME_FORMATS:
                 self.allDateTimeWithoutYearFormats.append(
-                    "%s %s" %
-                    (dtFmt, timeFmt))
+                    f"{dtFmt} {timeFmt}")
 
     def SetValue(self, value):
         "Put a new value into the editor"
