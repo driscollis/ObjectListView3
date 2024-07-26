@@ -102,6 +102,7 @@ import locale
 import operator
 import time
 import unicodedata
+import warnings
 
 from . import CellEditor
 from . import OLVEvent
@@ -523,18 +524,24 @@ class ObjectListView(wx.ListCtrl):
         """
         return self.AddNamedImages(None, smallImage, normalImage)
 
-    def AddObject(self, modelObject):
+    def AppendObject(self, modelObject):
         """
-        Add the given object to our collection of objects.
+        Append the given object to the end of our collection of objects.
 
         The object will appear at its sorted location, or at the end of the list if
         the list is unsorted
         """
-        self.AddObjects([modelObject])
+        self.ExtendObjects([modelObject])
 
-    def AddObjects(self, modelObjects):
+    def AddObject(self, modelObject):
+        warnings.warn(
+            "'AddObject()' is deprecated, use 'AppendObject()'",
+            DeprecationWarning)
+        self.AppendObject(modelObject)
+
+    def ExtendObjects(self, modelObjects):
         """
-        Add the given collections of objects to our collection of objects.
+        Append the given collections of objects to the end of our collection of objects.
 
         The objects will appear at their sorted locations, or at the end of the list if
         the list is unsorted
@@ -555,6 +562,12 @@ class ObjectListView(wx.ListCtrl):
             self._SortItemsNow()
         finally:
             self.Thaw()
+
+    def AddObjects(self, modelObjects):
+        warnings.warn(
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
+            DeprecationWarning)
+        self.ExtendObjects(modelObjects)
 
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
@@ -845,7 +858,7 @@ class ObjectListView(wx.ListCtrl):
         """
         Remove the given collections of objects from our collection of objects.
         """
-        # Unlike AddObjects(), there is no clever way to do this -- we have to simply
+        # Unlike ExtendObjects(), there is no clever way to do this -- we have to simply
         # remove the objects and rebuild the whole list. We can't just remove the rows
         # because every wxListItem holds the index of its matching model object. If we
         # remove the first model object, the index of every object will change.
@@ -2475,14 +2488,20 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
     #-------------------------------------------------------------------------
     # Commands
 
-    def AddObjects(self, modelObjects):
+    def ExtendObjects(self, modelObjects):
         """
-        Add the given collections of objects to our collection of objects.
+        Append the given collections of objects to the end of our collection of objects.
 
         This cannot work for virtual lists since the source of model objects is not
         under the control of the VirtualObjectListView.
         """
         pass
+
+    def AddObjects(self, modelObjects):
+        warnings.warn(
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
+            DeprecationWarning)
+        self.AppendObject(modelObjects)
 
     def RemoveObjects(self, modelObjects):
         """
@@ -2544,9 +2563,9 @@ class FastObjectListView(AbstractVirtualObjectListView):
     #-------------------------------------------------------------------------
     # Commands
 
-    def AddObjects(self, modelObjects):
+    def ExtendObjects(self, modelObjects):
         """
-        Add the given collections of objects to our collection of objects.
+        Append the given collections of objects to the end of our collection of objects.
         """
         self.modelObjects.extend(modelObjects)
         # We don't want to call RepopulateList() here since that makes the whole
@@ -2570,6 +2589,12 @@ class FastObjectListView(AbstractVirtualObjectListView):
 
         if first < self.GetItemCount():
             self.RefreshItems(first, self.GetItemCount() - 1)
+
+    def AddObjects(self, modelObjects):
+        warnings.warn(
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
+            DeprecationWarning)
+        self.ExtendObjects(modelObjects)
 
     def RepopulateList(self):
         """
@@ -2819,12 +2844,18 @@ class GroupListView(FastObjectListView):
     #-------------------------------------------------------------------------
     # Commands
 
-    def AddObjects(self, modelObjects):
+    def ExtendObjects(self, modelObjects):
         """
-        Add the given collections of objects to our collection of objects.
+        Append the given collections of objects to the end of our collection of objects.
         """
         self.groups = None
-        FastObjectListView.AddObjects(self, modelObjects)
+        FastObjectListView.ExtendObjects(self, modelObjects)
+
+    def AddObjects(self, modelObjects):
+        warnings.warn(
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
+            DeprecationWarning)
+        self.ExtendObjects(modelObjects)
 
     def CreateCheckStateColumn(self, columnIndex=0):
         """
@@ -4048,7 +4079,7 @@ class BatchedUpdate(object):
     packet. A batched update adapter solves situations like these in a trivial manner.
 
     This class only intercepts the following messages:
-        * ``AddObject()``, ``AddObjects()``
+        * ``AppendObject()``, ``ExtendObjects()``
         * ``RefreshObject()``, ``RefreshObjects()``
         * ``RemoveObject()``, ``RemoveObjects()``
         * ``RepopulateList()``
@@ -4065,7 +4096,7 @@ class BatchedUpdate(object):
        difficult-to-reproduce bugs. For example::
 
             self.olvBatched.SetObjects(objects) # Batched update
-            self.olvBatched.objectlistView.AddObject(aModel) # unbatched update
+            self.olvBatched.objectlistView.AppendObject(aModel) # unbatched update
 
        This will almost certainly not do what you expect, or at best, will only sometimes do
        what you want.
@@ -4073,11 +4104,11 @@ class BatchedUpdate(object):
     2) You cannot assume that objects will immediately appear in the list and
        thus be available for further operations. For example::
 
-            self.olv.AddObject(aModel)
+            self.olv.AppendObject(aModel)
             self.olv.Check(aModel)
 
        If *self.olv* is a batched update adapter, this code *may* not work since the
-       ``AddObject()`` might not have yet taken effect, so the ``Check()`` will not find
+       ``AppendObject()`` might not have yet taken effect, so the ``Check()`` will not find
        *aModel* in the control. Worse, it may work most of the time and fail only occassionally.
 
        If you need to be able to do further processing on objects just added, it would be better
@@ -4140,21 +4171,27 @@ class BatchedUpdate(object):
         self.objectsToRefresh = list()
         self.objectsToRemove = list()
 
-    def AddObject(self, modelObject):
+    def AppendObject(self, modelObject):
         """
-        Add the given object to our collection of objects.
+        Append the given object to the end of our collection of objects.
 
         The object will appear at its sorted location, or at the end of the list if
         the list is unsorted
         """
-        self.AddObjects([modelObject])
+        self.ExtendObjects([modelObject])
 
-    def AddObjects(self, modelObjects):
+    def AddObject(self, modelObject):
+        warnings.warn(
+            "'AddObject()' is deprecated, use 'AppendObject()'",
+            DeprecationWarning)
+        self.AppendObject(modelObject)
+
+    def ExtendObjects(self, modelObjects):
         """
         Remember the given model objects so that they can be added when the next update cycle occurs
         """
         if self.freezeUntil < time.clock():
-            self.objectListView.AddObjects(modelObjects)
+            self.objectListView.ExtendObjects(modelObjects)
             self.freezeUntil = time.clock() + self.updatePeriod
             return
 
@@ -4166,6 +4203,12 @@ class BatchedUpdate(object):
         if self.objectsToRemove:
             for x in modelObjects:
                 self.objectsToRemove.remove(x)
+
+    def AddObjects(self, modelObject):
+        warnings.warn(
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
+            DeprecationWarning)
+        self.ExtendObjects(modelObject)
 
     def RefreshObject(self, modelObject):
         """
@@ -4230,7 +4273,7 @@ class BatchedUpdate(object):
             self.objectListView.SetObjects(self.newModelObjects)
 
         if self.objectsToAdd:
-            self.objectListView.AddObjects(self.objectsToAdd)
+            self.objectListView.ExtendObjects(self.objectsToAdd)
 
         if self.objectsToRemove:
             self.objectListView.RemoveObjects(self.objectsToRemove)
