@@ -569,6 +569,36 @@ class ObjectListView(wx.ListCtrl):
             DeprecationWarning)
         self.ExtendObjects(modelObjects)
 
+    def InsertObject(self, modelPosition, modelObject, before=False):
+        """
+        Insert the given object after/before the position of the insert object.
+        """
+        self.InsertObject(modelPosition, [modelObject], before=before)
+
+    def InsertObjects(self, modelPosition, modelObjects, before=False):
+        """
+        Insert the given objects after/before the position of the insert object.
+        """
+        if len(self.innerList) == 0 and len(self.modelObjects) == 0:
+            return self.SetObjects(modelObjects)
+
+        try:
+            self.Freeze()
+            originalSize = len(self.innerList)
+            idx = self.innerList.index(modelPosition)   # Might throw a ValueError
+            if not before:
+                idx += 1
+            self.modelObjects[idx:idx] = modelObjects
+            self._BuildInnerList()
+            item = wx.ListItem()
+            item.SetColumn(0)
+            for i in range(idx, len(modelObjects)):
+                item.Clear()
+                self._InsertUpdateItem(item, i, modelObjects[i], True)
+            self._SortItemsNow()
+        finally:
+            self.Thaw()
+
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
         Add the given images (:class:`wx.Bitmap <wx:Bitmap>`) to the list of available images. Return the index of the image.
@@ -2503,6 +2533,15 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
             DeprecationWarning)
         self.AppendObject(modelObjects)
 
+    def InsertObjects(self, modelPosition, modelObjects, before=False):
+        """
+        Insert the given objects after/before the position of the insert object.
+
+        This cannot work for virtual lists since the source of model objects is not
+        under the control of the VirtualObjectListView.
+        """
+        pass
+
     def RemoveObjects(self, modelObjects):
         """
         Remove the given collections of objects from our collection of objects.
@@ -2856,6 +2895,14 @@ class GroupListView(FastObjectListView):
             "'AddObjects()' is deprecated, use 'ExtendObjects()'",
             DeprecationWarning)
         self.ExtendObjects(modelObjects)
+
+    def InsertObjects(self, modelPosition, modelObjects, before=False):
+        """
+        Insert the given objects after/before the position of the insert object.
+        """
+        self.groups = None
+        FastObjectListView.InsertObjects(
+            self, modelPosition, modelObjects, before=before)
 
     def CreateCheckStateColumn(self, columnIndex=0):
         """
@@ -4128,6 +4175,7 @@ class BatchedUpdate(object):
 
         self.newModelObjects = BatchedUpdate.NOT_SET
         self.objectsToAdd = list()
+        self.objectsToInsert = dict()
         self.objectsToRefresh = list()
         self.objectsToRemove = list()
         self.freezeUntil = 0
@@ -4210,6 +4258,25 @@ class BatchedUpdate(object):
             DeprecationWarning)
         self.ExtendObjects(modelObject)
 
+    def InsertObjects(self, modelPosition, modelObjects, before=False):
+        """
+        Insert the given objects after/before the position of the insert object.
+        """
+        if self.freezeUntil < time.process_time_ns():
+            self.objectListView.InsertObjects(
+                modelPosition, modelObjects, before=before)
+            self.freezeUntil = time.clock() + self.updatePeriod
+            return
+
+        # TODO: We should check that none of the model objects is already in
+        # the list
+        self.objectsToAdd[(modelPosition, before)] = modelObjects
+
+        # Since we are adding these objects, we must no longer remove them
+        if self.objectsToRemove:
+            for x in modelObjects:
+                self.objectsToRemove.remove(x)
+
     def RefreshObject(self, modelObject):
         """
         Refresh the display of the given model
@@ -4275,6 +4342,10 @@ class BatchedUpdate(object):
         if self.objectsToAdd:
             self.objectListView.ExtendObjects(self.objectsToAdd)
 
+        for (modelPosition, before), modelObjects in self.objectsToInsert.items():
+            self.objectListView.InsertObjects(
+                modelPosition, modelObjects, before=before)
+
         if self.objectsToRemove:
             self.objectListView.RemoveObjects(self.objectsToRemove)
 
@@ -4283,6 +4354,7 @@ class BatchedUpdate(object):
 
         self.newModelObjects = BatchedUpdate.NOT_SET
         self.objectsToAdd = list()
+        self.objectsToInsert = dict()
         self.objectsToRemove = list()
         self.objectsToRefresh = list()
         self.freezeUntil = time.clock() + self.updatePeriod
