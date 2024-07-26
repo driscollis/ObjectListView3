@@ -3881,11 +3881,10 @@ class ColumnDefn(object):
         # Try attribute access
         try:
             attr = getattr(modelObject, munger)
-        except AttributeError:
-            # Happens when attribute does not exist
-            pass
-        except TypeError:
-            # Happens when munger is not a string
+        except (AttributeError, TypeError):
+            # Happens when
+            # 1. attribute does not exist
+            # 2. munger is not a string
             pass
         else:
             try:
@@ -3907,9 +3906,9 @@ class ColumnDefn(object):
             return modelObject[munger]
         except (IndexError, KeyError, TypeError):
             # Happens when
-            # - modelObject is a list and munger index is out of range
-            # - modelObject is a dictionary and munger key does not exist
-            # - modelObject is a list and munger is not an integer
+            # 1. modelObject is a list and munger index is out of range
+            # 2. modelObject is a dictionary and munger key does not exist
+            # 3. modelObject is a list and munger is not an integer
             return None
 
     #-------------------------------------------------------------------------
