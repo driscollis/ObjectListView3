@@ -835,13 +835,13 @@ class ObjectListView(wx.ListCtrl):
         finally:
             self.Thaw()
 
-    def RemoveObject(self, modelObject):
+    def RemoveObject(self, modelObject, keepOrder=False):
         """
         Remove the given object from our collection of objects.
         """
-        self.RemoveObjects([modelObject])
+        self.RemoveObjects([modelObject], keepOrder=keepOrder)
 
-    def RemoveObjects(self, modelObjects):
+    def RemoveObjects(self, modelObjects, keepOrder=False):
         """
         Remove the given collections of objects from our collection of objects.
         """
@@ -854,6 +854,10 @@ class ObjectListView(wx.ListCtrl):
         # Use sets to quickly remove objects from self.modelObjects
         # For large collections, this is MUCH faster.
         try:
+            if keepOrder:
+                # Jump to alternative removal algorithm which keeps the order
+                # of the modelObjects (but is slower)
+                raise TypeError
             s1 = set(self.modelObjects)
             s2 = set(modelObjects)
             self.modelObjects = list(s1 - s2)
@@ -2502,7 +2506,7 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
         """
         pass
 
-    def RemoveObjects(self, modelObjects):
+    def RemoveObjects(self, modelObjects, keepOrder=False):
         """
         Remove the given collections of objects from our collection of objects.
 
@@ -2855,12 +2859,12 @@ class GroupListView(FastObjectListView):
             columnIndex = 1
         FastObjectListView.CreateCheckStateColumn(self, columnIndex)
 
-    def RemoveObjects(self, modelObjects):
+    def RemoveObjects(self, modelObjects, keepOrder=False):
         """
         Remove the given collections of objects from our collection of objects.
         """
         self.groups = None
-        FastObjectListView.RemoveObjects(self, modelObjects)
+        FastObjectListView.RemoveObjects(self, modelObjects, keepOrder=keepOrder)
 
     def SetColumns(self, columns, repopulate=True):
         """
@@ -4114,9 +4118,10 @@ class BatchedUpdate(object):
     # non-valid value that indicates that SetObjects() has not been called
     NOT_SET = -1
 
-    def __init__(self, objectListView, updatePeriod=0):
+    def __init__(self, objectListView, updatePeriod=0, keepOrder=False):
         self.objectListView = objectListView  # Must not be None
         self.updatePeriod = int(updatePeriod * 1e9)     # Convert s to ns
+        self.keepOrder = keepOrder
 
         self.objectListView.Bind(wx.EVT_IDLE, self._HandleIdle)
 
@@ -4209,18 +4214,18 @@ class BatchedUpdate(object):
 
         self.objectsToRefresh.extend(modelObjects)
 
-    def RemoveObject(self, modelObject):
+    def RemoveObject(self, modelObject, keepOrder=False):
         """
         Remember the given model objects so that they can be removed when the next update cycle occurs
         """
-        self.RemoveObjects([modelObject])
+        self.RemoveObjects([modelObject], keepOrder=keepOrder)
 
-    def RemoveObjects(self, modelObjects):
+    def RemoveObjects(self, modelObjects, keepOrder=False):
         """
         Remember the given model objects so that they can be removed when the next update cycle occurs
         """
         if self.freezeUntil < time.process_time_ns():
-            self.objectListView.RemoveObjects(modelObjects)
+            self.objectListView.RemoveObjects(modelObjects, keepOrder=keepOrder)
             self.freezeUntil = time.process_time_ns() + self.updatePeriod
             return
 
@@ -4258,7 +4263,8 @@ class BatchedUpdate(object):
             self.objectListView.AddObjects(self.objectsToAdd)
 
         if self.objectsToRemove:
-            self.objectListView.RemoveObjects(self.objectsToRemove)
+            self.objectListView.RemoveObjects(
+                self.objectsToRemove, keepOrder=self.keepOrder)
 
         if self.objectsToRefresh:
             self.objectListView.RefreshObjects(self.objectsToRefresh)
