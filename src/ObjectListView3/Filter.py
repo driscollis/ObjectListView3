@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Name:         Filter.py
 # Author:       Phillip Piper
 # Created:      26 August 2008
 # Copyright:    (c) 2008 Phillip Piper
 # License:      wxWindows license
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Change log:
 # 2008/08/26  JPP   First version
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # To do:
 #
 
@@ -61,7 +61,6 @@ def Tail(num):
 
 
 class TextSearch(object):
-
     """
     Return only model objects that match a given string. If columns is not empty,
     only those columns will be considered when searching for the string. Otherwise,
@@ -111,7 +110,6 @@ class TextSearch(object):
 
 
 class Chain(object):
-
     """
     Return only model objects that match all of the given filters.
 
