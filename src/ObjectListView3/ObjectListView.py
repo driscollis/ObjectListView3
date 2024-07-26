@@ -573,7 +573,7 @@ class ObjectListView(wx.ListCtrl):
         """
         Insert the given object after/before the position of the insert object.
         """
-        self.InsertObject(modelPosition, [modelObject], before=before)
+        self.InsertObjects(modelPosition, [modelObject], before=before)
 
     def InsertObjects(self, modelPosition, modelObjects, before=False):
         """
