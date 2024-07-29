@@ -83,7 +83,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
         # Build the data behind the control
         fe = wx.FontEnumerator()
         fe.EnumerateFacenames()
-        self.fontInfo = [ Bucket(name=x, display=x+extendedText) for x in sorted(fe.GetFacenames(), key=unicode.lower) ]
+        self.fontInfo = [ Bucket(name=x, display=x+extendedText) for x in sorted(fe.GetFacenames(), key=str.lower) ]
 
         kwargs['style'] = kwargs.get("style", 0) | wx.CB_READONLY
         kwargs["choices"] = [x.name for x in self.fontInfo]
@@ -117,7 +117,7 @@ class FontFaceComboBox(OwnerDrawnComboBox):
         else:
             dc.SetFont(bucket.font)
             display = bucket.display
-        dc.DrawText(display, rect.x + 3, rect.y + ((rect.height - dc.GetCharHeight()) / 2))
+        dc.DrawText(display, rect.x + 3, rect.y + round((rect.height - dc.GetCharHeight()) / 2))
 
     def OnDrawBackground(self, dc, rect, item, flags):
         # If the item is selected, or we are painting the combo control itself, then use
@@ -216,7 +216,7 @@ class ColourComboBox(OwnerDrawnComboBox):
             else:
                 dc.SetTextForeground(wx.WHITE)
 
-        dc.DrawText(bucket.name, rect.x + 3, rect.y + ((rect.height - dc.GetCharHeight()) / 2))
+        dc.DrawText(bucket.name, rect.x + 3, rect.y + round((rect.height - dc.GetCharHeight()) / 2))
 
     def OnDrawBackground(self, dc, rect, item, flags):
         # If the item is selected, then use the default rendering.

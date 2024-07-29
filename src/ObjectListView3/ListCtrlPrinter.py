@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Name:         ListCtrlPrinter.py
 # Author:       Phillip Piper
 # Created:      17 July 2008
 # Copyright:    (c) 2008 by Phillip Piper, 2008
 # License:      wxWindows license
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Change log:
 # 2008/07/17  JPP   Inspired beginning
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # To do:
 # - persistence of ReportFormat
 # - allow cell contents to be vertically aligned
@@ -104,25 +104,23 @@ import wx
 
 from .WordWrapRenderer import WordWrapRenderer
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 
 class ListCtrlPrinter(object):
-
     """
     An ListCtrlPrinter creates a pretty report from an ObjectListView/ListCtrl.
 
     """
 
     def __init__(self, listCtrl=None, title="ListCtrl Printing"):
-        """
-        """
+        """ """
         self.printout = ListCtrlPrintout(self)
         self.engine = ReportEngine()
         if listCtrl is not None:
             self.AddListCtrl(listCtrl, title)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetPageFooter(self):
@@ -195,7 +193,7 @@ class ListCtrlPrinter(object):
     PrintData = property(GetPrintData)
     Watermark = property(GetWatermark, SetWatermark)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Setup
 
     def AddListCtrl(self, listCtrl, title=None):
@@ -210,7 +208,7 @@ class ListCtrlPrinter(object):
         """
         self.engine.ClearListCtrls()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Printing Commands
 
     def PageSetup(self, parent=None):
@@ -220,14 +218,8 @@ class ListCtrlPrinter(object):
         self.printout.PageSetup(parent)
 
     def PrintPreview(
-        self,
-        parent=None,
-        title="ListCtrl Print Preview",
-        bounds=(
-            20,
-            50,
-            800,
-            800)):
+        self, parent=None, title="ListCtrl Print Preview", bounds=(20, 50, 800, 800)
+    ):
         """
         Show a Print Preview of this report
         """
@@ -239,7 +231,7 @@ class ListCtrlPrinter(object):
         """
         self.printout.DoPrint(parent)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Callbacks
     # These methods are invoked by the ListCtrlPrintout when required
 
@@ -263,11 +255,11 @@ class ListCtrlPrinter(object):
         """
         return self.engine.PrintPage(dc, pageNumber, bounds)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ReportEngine(object):
-
     """
     A ReportEngine handles all the work of actually producing a report.
 
@@ -282,8 +274,7 @@ class ReportEngine(object):
     """
 
     def __init__(self):
-        """
-        """
+        """ """
         self.currentPage = -1
         self.totalPages = -1
         self.blocks = list()
@@ -302,7 +293,7 @@ class ReportEngine(object):
         # pages, or skipping to a specific page
         self.shouldDrawBlocks = True
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetNamedFormat(self, name):
@@ -331,7 +322,7 @@ class ReportEngine(object):
         }
         return info
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculating
 
     def CalculateTotalPages(self, dc, bounds):
@@ -348,7 +339,7 @@ class ReportEngine(object):
         self.shouldDrawBlocks = True
         return self.totalPages
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def AddBlock(self, block):
@@ -379,7 +370,7 @@ class ReportEngine(object):
         self.blocks.pop(0)
         self.blockInsertionIndex = 1
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Printing
 
     def StartPrinting(self):
@@ -467,7 +458,7 @@ class ReportEngine(object):
 
         fmt = self.GetNamedFormat("Page")
         bounds = list(self.pageBounds)
-        fmt.DrawDecorations(dc, bounds, self, over)
+        fmt.DrawDecorations(dc, RectUtils.Round(bounds), self, over)
 
     def _CreateReplaceWatermarkDecoration(self):
         """
@@ -475,8 +466,8 @@ class ReportEngine(object):
         """
         pageFmt = self.GetNamedFormat("Page")
         pageFmt.decorations = [
-            x for x in pageFmt.decorations if not isinstance(
-                x, WatermarkDecoration)]
+            x for x in pageFmt.decorations if not isinstance(x, WatermarkDecoration)
+        ]
 
         watermarkFmt = self.GetNamedFormat("Watermark")
         pageFmt.Add(
@@ -485,21 +476,22 @@ class ReportEngine(object):
                 font=watermarkFmt.Font,
                 color=watermarkFmt.TextColor,
                 angle=watermarkFmt.Angle,
-                over=watermarkFmt.Over))
+                over=watermarkFmt.Over,
+            )
+        )
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ListCtrlPrintout(wx.Printout):
-
     """
     An ListCtrlPrintout is the interface between the wx printing system
     and ListCtrlPrinter.
     """
 
     def __init__(self, olvPrinter, margins=None):
-        """
-        """
+        """ """
         wx.Printout.__init__(self)
         self.olvPrinter = olvPrinter
         self.margins = margins or (wx.Point(15, 15), wx.Point(15, 15))
@@ -510,7 +502,7 @@ class ListCtrlPrintout(wx.Printout):
         self.printData.SetPaperId(wx.PAPER_A4)
         self.printData.SetPrintMode(wx.PRINT_MODE_PRINTER)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def HasPage(self, page):
@@ -535,7 +527,7 @@ class ListCtrlPrintout(wx.Printout):
         preview = wx.PrintPreview(forViewing, forPrinter, data)
         return preview
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def PageSetup(self, parent):
@@ -552,9 +544,7 @@ class ListCtrlPrintout(wx.Printout):
             data = dlg.GetPageSetupData()
             self.printData = wx.PrintData(data.GetPrintData())
             self.printData.SetPaperId(data.GetPaperId())
-            self.margins = (
-                data.GetMarginTopLeft(),
-                data.GetMarginBottomRight())
+            self.margins = (data.GetMarginTopLeft(), data.GetMarginBottomRight())
         dlg.Destroy()
 
     def PrintPreview(self, parent, title, bounds):
@@ -585,20 +575,22 @@ class ListCtrlPrintout(wx.Printout):
 
             if printer.Print(parent, self, True):
                 self.printData = wx.PrintData(
-                    printer.GetPrintDialogData().GetPrintData())
+                    printer.GetPrintDialogData().GetPrintData()
+                )
             else:
                 error = printer.GetLastError()
                 if error == wx.PRINTER_ERROR:
                     wx.MessageBox(
                         "There was a problem printing.\nPerhaps your current printer is not set correctly?",
                         "Printing",
-                        wx.OK)
+                        wx.OK,
+                    )
                 elif error == wx.PRINTER_CANCELLED:
                     pass
         finally:
             pdd.Destroy()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Event handlers
 
     def OnPreparePrinting(self):
@@ -654,21 +646,15 @@ class ListCtrlPrintout(wx.Printout):
         topLeft, bottomRight = self.margins
         left = round(topLeft.x * logicalUnitsMM)
         top = round(topLeft.y * logicalUnitsMM)
-        right = round(
-            dc.DeviceToLogicalYRel(dw) -
-            bottomRight.x *
-            logicalUnitsMM)
-        bottom = round(
-            dc.DeviceToLogicalYRel(dh) -
-            bottomRight.y *
-            logicalUnitsMM)
+        right = round(dc.DeviceToLogicalYRel(dw) - bottomRight.x * logicalUnitsMM)
+        bottom = round(dc.DeviceToLogicalYRel(dh) - bottomRight.y * logicalUnitsMM)
         self.bounds = (left, top, right - left, bottom - top)
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class ReportFormat(object):
-
     """
     A ReportFormat defines completely how a report is formatted.
 
@@ -697,8 +683,7 @@ class ReportFormat(object):
     """
 
     def __init__(self):
-        """
-        """
+        """ """
         # Initialize the formats that control the various portions of the
         # report
         self.Page = BlockFormat()
@@ -719,7 +704,7 @@ class ReportFormat(object):
         # Initialize the watermark format to default values
         self.WatermarkFormat()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetNamedFormat(self, name):
@@ -728,7 +713,7 @@ class ReportFormat(object):
         """
         return getattr(self, name)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def WatermarkFormat(self, font=None, color=None, angle=30, over=False):
@@ -739,15 +724,13 @@ class ReportFormat(object):
         """
         defaultFaceName = "Stencil"
         self.Watermark.Font = font or wx.FFont(
-            96,
-            wx.FONTFAMILY_DEFAULT,
-            0,
-            defaultFaceName)
+            96, wx.FONTFAMILY_DEFAULT, 0, defaultFaceName
+        )
         self.Watermark.TextColor = color or wx.Colour(204, 204, 204)
         self.Watermark.Angle = angle
         self.Watermark.Over = over
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Standard formats
     # These are meant to be illustrative rather than definitive
 
@@ -761,47 +744,38 @@ class ReportFormat(object):
         fmt.IsShrinkToFit = False
 
         fmt.PageHeader.Font = wx.FFont(
-            12,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            12, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.PageHeader.Line(wx.BOTTOM, wx.BLACK, 1, space=5)
         fmt.PageHeader.Padding = (0, 0, 0, 12)
 
         fmt.ListHeader.Font = wx.FFont(
-            18,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            18, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.ListHeader.Padding = (0, 12, 0, 12)
         fmt.ListHeader.Line(wx.BOTTOM, wx.BLACK, 1, space=5)
 
         fmt.GroupTitle.Font = wx.FFont(
-            12,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            12, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.GroupTitle.Padding = (0, 12, 0, 12)
         fmt.GroupTitle.Line(wx.BOTTOM, wx.BLACK, 1, space=5)
 
         fmt.PageFooter.Font = wx.FFont(
-            10,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            10, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.PageFooter.Line(wx.TOP, wx.BLACK, 1, space=3)
         fmt.PageFooter.Padding = (0, 16, 0, 0)
 
         fmt.ColumnHeader.Font = wx.FFont(
-            14,
-            wx.FONTFAMILY_DEFAULT,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            14, wx.FONTFAMILY_DEFAULT, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.ColumnHeader.Padding = (0, 12, 0, 12)
         fmt.ColumnHeader.CellPadding = 5
         fmt.ColumnHeader.Line(wx.BOTTOM, wx.Colour(192, 192, 192), 1, space=3)
         fmt.ColumnHeader.AlwaysCenter = True
 
-        fmt.Row.Font = wx.FFont(
-            10,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=rowFontName)
+        fmt.Row.Font = wx.FFont(10, wx.FONTFAMILY_DEFAULT, faceName=rowFontName)
         fmt.Row.CellPadding = 5
         fmt.Row.Line(wx.BOTTOM, wx.Colour(192, 192, 192), 1, space=3)
         fmt.Row.CanWrap = True
@@ -818,50 +792,40 @@ class ReportFormat(object):
         fmt.IsShrinkToFit = True
 
         fmt.PageHeader.Font = wx.FFont(
-            12,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            12, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.PageHeader.Line(wx.BOTTOM, wx.BLUE, 2, space=5)
         fmt.PageHeader.Padding = (0, 0, 0, 12)
 
         fmt.ListHeader.Font = wx.FFont(
-            26,
-            wx.FONTFAMILY_SWISS,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            26, wx.FONTFAMILY_SWISS, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.ListHeader.TextColor = wx.WHITE
         fmt.ListHeader.Padding = (0, 12, 0, 12)
         fmt.ListHeader.TextAlignment = wx.ALIGN_LEFT
         fmt.ListHeader.Background(wx.BLUE, wx.WHITE, space=(16, 4, 0, 4))
 
         fmt.GroupTitle.Font = wx.FFont(
-            14,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            14, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.GroupTitle.Line(wx.BOTTOM, wx.BLUE, 4, toColor=wx.WHITE, space=5)
         fmt.GroupTitle.Padding = (0, 12, 0, 12)
 
         fmt.PageFooter.Font = wx.FFont(
-            10,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=headerFontName)
+            10, wx.FONTFAMILY_DEFAULT, faceName=headerFontName
+        )
         fmt.PageFooter.Background(wx.WHITE, wx.BLUE, space=(0, 4, 0, 4))
 
         fmt.ColumnHeader.Font = wx.FFont(
-            14,
-            wx.FONTFAMILY_DEFAULT,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            14, wx.FONTFAMILY_DEFAULT, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.ColumnHeader.CellPadding = 2
         fmt.ColumnHeader.Background(wx.Colour(192, 192, 192))
         fmt.ColumnHeader.GridPen = wx.Pen(wx.WHITE, 1)
         fmt.ColumnHeader.Padding = (0, 0, 0, 12)
         fmt.ColumnHeader.AlwaysCenter = True
 
-        fmt.Row.Font = wx.FFont(
-            12,
-            wx.FONTFAMILY_DEFAULT,
-            faceName=rowFontName)
+        fmt.Row.Font = wx.FFont(12, wx.FONTFAMILY_DEFAULT, faceName=rowFontName)
         fmt.Row.Line(wx.BOTTOM, pen=wx.Pen(wx.BLUE, 1, wx.DOT), space=3)
         fmt.Row.CellPadding = 2
         fmt.Row.CanWrap = True
@@ -878,44 +842,36 @@ class ReportFormat(object):
         fmt.IsShrinkToFit = False
 
         fmt.PageHeader.Font = wx.FFont(
-            12,
-            wx.FONTFAMILY_DECORATIVE,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            12, wx.FONTFAMILY_DECORATIVE, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.PageHeader.TextColor = wx.WHITE
         fmt.PageHeader.Background(wx.GREEN, wx.RED, space=(16, 4, 0, 4))
         fmt.PageHeader.Padding = (0, 0, 0, 12)
 
         fmt.ListHeader.Font = wx.FFont(
-            24,
-            wx.FONTFAMILY_DECORATIVE,
-            faceName=headerFontName)
+            24, wx.FONTFAMILY_DECORATIVE, faceName=headerFontName
+        )
         fmt.ListHeader.TextColor = wx.WHITE
         fmt.ListHeader.Padding = (0, 12, 0, 12)
         fmt.ListHeader.TextAlignment = wx.ALIGN_CENTER
         fmt.ListHeader.Background(wx.RED, wx.GREEN, space=(16, 4, 0, 4))
 
         fmt.GroupTitle.Font = wx.FFont(
-            14,
-            wx.FONTFAMILY_DECORATIVE,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            14, wx.FONTFAMILY_DECORATIVE, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.GroupTitle.TextColor = wx.BLUE
         fmt.GroupTitle.Padding = (0, 12, 0, 12)
         fmt.GroupTitle.Line(wx.BOTTOM, wx.GREEN, 4, toColor=wx.WHITE, space=5)
 
         fmt.PageFooter.Font = wx.FFont(
-            10,
-            wx.FONTFAMILY_DECORATIVE,
-            faceName=headerFontName)
+            10, wx.FONTFAMILY_DECORATIVE, faceName=headerFontName
+        )
         fmt.PageFooter.Line(wx.TOP, wx.GREEN, 2, toColor=wx.RED, space=3)
         fmt.PageFooter.Padding = (0, 16, 0, 0)
 
         fmt.ColumnHeader.Font = wx.FFont(
-            14,
-            wx.FONTFAMILY_SWISS,
-            wx.FONTFLAG_BOLD,
-            faceName=headerFontName)
+            14, wx.FONTFAMILY_SWISS, wx.FONTFLAG_BOLD, faceName=headerFontName
+        )
         fmt.ColumnHeader.Background(wx.Colour(255, 215, 0))
         fmt.ColumnHeader.CellPadding = 5
         fmt.ColumnHeader.GridPen = wx.Pen(wx.Colour(192, 192, 192), 1)
@@ -929,11 +885,11 @@ class ReportFormat(object):
 
         return fmt
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class BlockFormat(object):
-
     """
     A block format defines how a Block is formatted.
 
@@ -989,8 +945,7 @@ class BlockFormat(object):
     """
 
     def __init__(self):
-        """
-        """
+        """ """
         self.padding = None
         self.decorations = list()
         self.font = wx.FFont(11, wx.FONTFAMILY_SWISS, faceName="Gill Sans")
@@ -1004,7 +959,7 @@ class BlockFormat(object):
         self.cellPadding = None
         self.gridPen = None
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetFont(self):
@@ -1136,7 +1091,7 @@ class BlockFormat(object):
     TextAlign = property(GetTextAlignment, SetTextAlignment)
     TextColour = property(GetTextColor, SetTextColor)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculations
 
     def CalculateCellPadding(self):
@@ -1155,7 +1110,7 @@ class BlockFormat(object):
 
         return cellPadding
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Decorations
 
     def Add(self, decoration):
@@ -1165,13 +1120,8 @@ class BlockFormat(object):
         self.decorations.append(decoration)
 
     def Line(
-            self,
-            side=wx.BOTTOM,
-            color=wx.BLACK,
-            width=1,
-            toColor=None,
-            space=0,
-            pen=None):
+        self, side=wx.BOTTOM, color=wx.BLACK, width=1, toColor=None, space=0, pen=None
+    ):
         """
         Add a line to our decorations.
         If a pen is given, we use a straight Line decoration, otherwise we use a
@@ -1180,24 +1130,13 @@ class BlockFormat(object):
         if pen:
             self.Add(LineDecoration(side, pen, space))
         else:
-            self.Add(
-                RectangleDecoration(
-                    side,
-                    None,
-                    color,
-                    toColor,
-                    width,
-                    space))
+            self.Add(RectangleDecoration(side, None, color, toColor, width, space))
 
     def Background(self, color=wx.BLUE, toColor=None, space=0):
         """
         Add a coloured background to the block
         """
-        self.Add(
-            RectangleDecoration(
-                color=color,
-                toColor=toColor,
-                space=space))
+        self.Add(RectangleDecoration(color=color, toColor=toColor, space=space))
 
     def Frame(self, pen=None, space=0):
         """
@@ -1205,7 +1144,7 @@ class BlockFormat(object):
         """
         self.Add(RectangleDecoration(pen=pen, space=space))
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def SubtractPadding(self, bounds):
@@ -1234,10 +1173,10 @@ class BlockFormat(object):
                 x.DrawDecoration(dc, bounds, block)
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class Block(object):
-
     """
     A Block is a portion of a report that will stack vertically with other
     Block. A report consists of several Blocks.
@@ -1247,7 +1186,7 @@ class Block(object):
         # This is also set when the block is added to a print engine
         self.engine = engine
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetFont(self):
@@ -1310,26 +1249,20 @@ class Block(object):
         """
         return True
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculating
 
     def CalculateExtrasHeight(self, dc):
         """
         Return the height of the padding and decorations themselves
         """
-        return 0 - RectUtils.Height(
-            self.GetReducedBlockBounds(
-                dc, [
-                    0, 0, 0, 0]))
+        return 0 - RectUtils.Height(self.GetReducedBlockBounds(dc, [0, 0, 0, 0]))
 
     def CalculateExtrasWidth(self, dc):
         """
         Return the width of the padding and decorations themselves
         """
-        return 0 - RectUtils.Width(
-            self.GetReducedBlockBounds(
-                dc, [
-                    0, 0, 0, 0]))
+        return 0 - RectUtils.Width(self.GetReducedBlockBounds(dc, [0, 0, 0, 0]))
 
     def CalculateHeight(self, dc):
         """
@@ -1345,10 +1278,7 @@ class Block(object):
         font = font or self.GetFont()
         dc.SetFont(font)
         if self.GetFormat().CanWrap:
-            return WordWrapRenderer.CalculateHeight(
-                dc,
-                txt,
-                RectUtils.Width(bounds))
+            return WordWrapRenderer.CalculateHeight(dc, txt, RectUtils.Width(bounds))
         else:
             # Calculate the height of one line. The 1000 pixel width
             # ensures that 'Wy' doesn't wrap, which might happen if bounds is
@@ -1361,7 +1291,7 @@ class Block(object):
         """
         return height <= RectUtils.Height(self.GetWorkBounds())
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -1413,10 +1343,10 @@ class Block(object):
         """
         fmt = self.GetFormat()
         decorationBounds = fmt.SubtractPadding(bounds)
-        fmt.DrawDecorations(dc, decorationBounds, self, False)
+        fmt.DrawDecorations(dc, RectUtils.Round(decorationBounds), self, False)
         textBounds = fmt.SubtractDecorations(dc, list(decorationBounds))
         self.DrawSelf(dc, textBounds)
-        fmt.DrawDecorations(dc, decorationBounds, self, True)
+        fmt.DrawDecorations(dc, RectUtils.Round(decorationBounds), self, True)
 
     def PreDraw(self, dc, bounds):
         """
@@ -1437,18 +1367,19 @@ class Block(object):
         pass
 
     def DrawText(
-            self,
-            dc,
-            txt,
-            bounds,
-            font=None,
-            alignment=wx.ALIGN_LEFT,
-            valignment=wx.ALIGN_CENTRE,
-            image=None,
-            color=None,
-            canWrap=True,
-            imageIndex=-1,
-            listCtrl=None):
+        self,
+        dc,
+        txt,
+        bounds,
+        font=None,
+        alignment=wx.ALIGN_LEFT,
+        valignment=wx.ALIGN_CENTRE,
+        image=None,
+        color=None,
+        canWrap=True,
+        imageIndex=-1,
+        listCtrl=None,
+    ):
         """
         Draw the given text in the given DC according to the given characteristics.
 
@@ -1480,37 +1411,33 @@ class Block(object):
         # Draw any image
         if image:
             y = _CalcBitmapPosition(bounds, image.Height)
-            dc.DrawBitmap(image, RectUtils.Left(bounds), y)
-            RectUtils.MoveLeftBy(
-                bounds,
-                image.GetWidth() +
-                GAP_BETWEEN_IMAGE_AND_TEXT)
+            dc.DrawBitmap(image, round(RectUtils.Left(bounds)), round(y))
+            RectUtils.MoveLeftBy(bounds, image.GetWidth() + GAP_BETWEEN_IMAGE_AND_TEXT)
         elif listCtrl and imageIndex >= 0:
             imageList = listCtrl.GetImageList(wx.IMAGE_LIST_SMALL)
             y = _CalcBitmapPosition(bounds, imageList.GetSize(0)[1])
             imageList.Draw(
                 imageIndex,
                 dc,
-                RectUtils.Left(bounds),
-                y,
-                wx.IMAGELIST_DRAW_TRANSPARENT)
+                round(RectUtils.Left(bounds)),
+                round(y),
+                wx.IMAGELIST_DRAW_TRANSPARENT,
+            )
             RectUtils.MoveLeftBy(
-                bounds,
-                imageList.GetSize(0)[0] +
-                GAP_BETWEEN_IMAGE_AND_TEXT)
+                bounds, imageList.GetSize(0)[0] + GAP_BETWEEN_IMAGE_AND_TEXT
+            )
 
         # Draw the text
         dc.SetFont(font or self.GetFont())
         dc.SetTextForeground(color or self.GetTextColor() or wx.BLACK)
         if canWrap:
-            WordWrapRenderer.DrawString(dc, txt, bounds, alignment, valignment)
+            WordWrapRenderer.DrawString(
+                dc, txt, RectUtils.Round(bounds), alignment, valignment
+            )
         else:
             WordWrapRenderer.DrawTruncatedString(
-                dc,
-                txt,
-                bounds,
-                alignment,
-                valignment)
+                dc, txt, RectUtils.Round(bounds), alignment, valignment
+            )
 
     def PerformSubstitutions(self, strings):
         """
@@ -1527,11 +1454,11 @@ class Block(object):
             # We don't die if we get a substitution error - we just ignore it
             return strings
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class TextBlock(Block):
-
     """
     A TextBlock prints a string objects.
     """
@@ -1547,7 +1474,7 @@ class TextBlock(Block):
             return False
 
     def GetText(self):
-        return "Missing GetText() in class %s" % self.__class__.__name__
+        return f"Missing GetText() in class {self.__class__.__name__}"
 
     def GetSubstitutedText(self):
         """
@@ -1576,13 +1503,14 @@ class TextBlock(Block):
             self.GetSubstitutedText(),
             bounds,
             canWrap=fmt.CanWrap,
-            alignment=fmt.TextAlignment)
+            alignment=fmt.TextAlignment,
+        )
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class CellBlock(Block):
-
     """
     A CellBlock is a Block whose data is presented in a cell format.
     """
@@ -1591,7 +1519,7 @@ class CellBlock(Block):
         self.scale = 1
         self.oldScale = 1
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing - Subclasses should override
 
     def GetCellWidths(self):
@@ -1618,7 +1546,7 @@ class CellBlock(Block):
         """
         return list()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetCombinedLists(self):
@@ -1628,21 +1556,21 @@ class CellBlock(Block):
         """
         buckets = [
             Bucket(cellWidth=x, text="", align=None, image=None)
-            for x in self.GetCellWidths()]
-        for (i, x) in enumerate(self.GetSubstitutedTexts()):
+            for x in self.GetCellWidths()
+        ]
+        for i, x in enumerate(self.GetSubstitutedTexts()):
             buckets[i].text = x
-        for (i, x) in enumerate(self.GetAlignments()):
+        for i, x in enumerate(self.GetAlignments()):
             buckets[i].align = x
 
         if self.IncludeImages():
-            for (i, x) in enumerate(self.GetImages()):
+            for i, x in enumerate(self.GetImages()):
                 buckets[i].image = x
 
         # Calculate where the cell contents should be drawn
         cellPadding = self.GetFormat().CalculateCellPadding()
         for x in buckets:
-            x.innerCellWidth = max(
-                0, x.cellWidth - (cellPadding[0] + cellPadding[2]))
+            x.innerCellWidth = max(0, x.cellWidth - (cellPadding[0] + cellPadding[2]))
 
         return buckets
 
@@ -1661,7 +1589,7 @@ class CellBlock(Block):
         else:
             return self.GetTexts()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculating
 
     def CalculateHeight(self, dc):
@@ -1678,35 +1606,27 @@ class CellBlock(Block):
             for x in self.GetCombinedLists():
                 textWidth = x.innerCellWidth
                 if self.GetListCtrl() and x.image != -1:
-                    imageList = self.GetListCtrl().GetImageList(
-                        wx.IMAGE_LIST_SMALL)
-                    textWidth -= imageList.GetSize(
-                        0)[0] + GAP_BETWEEN_IMAGE_AND_TEXT
+                    imageList = self.GetListCtrl().GetImageList(wx.IMAGE_LIST_SMALL)
+                    textWidth -= imageList.GetSize(0)[0] + GAP_BETWEEN_IMAGE_AND_TEXT
                 bounds = [0, 0, textWidth, 99999]
-                height = max(
-                    height,
-                    self.CalculateTextHeight(
-                        dc,
-                        x.text,
-                        bounds,
-                        font))
+                height = max(height, self.CalculateTextHeight(dc, x.text, bounds, font))
         else:
             height = self.CalculateTextHeight(dc, "Wy")
 
         # We also have to allow for cell padding, on top of the normal padding
         # and decorations
         cellPadding = self.GetFormat().CalculateCellPadding()
-        return height + cellPadding[1] + cellPadding[
-            3] + self.CalculateExtrasHeight(dc)
+        return height + cellPadding[1] + cellPadding[3] + self.CalculateExtrasHeight(dc)
 
     def CalculateWidth(self, dc):
         """
         Calculate the total width of this block (cells plus padding)
         """
         return sum(
-            x.cellWidth for x in self.GetCombinedLists()) + self.CalculateExtrasWidth(dc)
+            x.cellWidth for x in self.GetCombinedLists()
+        ) + self.CalculateExtrasWidth(dc)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def CalculateBounds(self, dc):
@@ -1735,11 +1655,7 @@ class CellBlock(Block):
         Apply our scale before performing any drawing
         """
         self.oldScale = dc.GetUserScale()
-        dc.SetUserScale(
-            self.scale *
-            self.oldScale[0],
-            self.scale *
-            self.oldScale[1])
+        dc.SetUserScale(self.scale * self.oldScale[0], self.scale * self.oldScale[1])
 
     def PostDraw(self, dc, bounds):
         """
@@ -1775,7 +1691,8 @@ class CellBlock(Block):
                 x.align,
                 imageIndex=x.image,
                 canWrap=cellFmt.CanWrap,
-                listCtrl=self.GetListCtrl())
+                listCtrl=self.GetListCtrl(),
+            )
 
         if cellFmt.GridPen and combined:
             dc.SetPen(cellFmt.GridPen)
@@ -1787,18 +1704,18 @@ class CellBlock(Block):
             # Draw the interior dividers
             for x in combined[:-1]:
                 right = RectUtils.Right(x.cell)
-                dc.DrawLine(right, top, right, bottom)
+                dc.DrawLine(*map(round, (right, top, right, bottom)))
 
             # Draw the surrounding frame
             left = RectUtils.Left(combined[0].cell)
             right = RectUtils.Right(combined[-1].cell)
-            dc.DrawRectangle(left, top, right - left, bottom - top)
+            dc.DrawRectangle(*map(round, (left, top, right - left, bottom - top)))
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class ThreeCellBlock(CellBlock):
-
     """
     A ThreeCellBlock divides its space evenly into three cells.
     """
@@ -1827,16 +1744,16 @@ class ThreeCellBlock(CellBlock):
         """
         return (wx.ALIGN_LEFT, wx.ALIGN_CENTER_HORIZONTAL, wx.ALIGN_RIGHT)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ReportBlock(Block):
-
     """
     A ReportBlock is boot strap Block that represents an entire report.
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -1851,17 +1768,17 @@ class ReportBlock(Block):
         # Print each ListView. Each list but the first starts on a separate
         # page
         self.engine.AddBlock(ListBlock(*self.engine.listCtrls[0]))
-        for (lv, title) in self.engine.listCtrls[1:]:
+        for lv, title in self.engine.listCtrls[1:]:
             self.engine.AddBlock(PageBreakBlock())
             self.engine.AddBlock(ListBlock(lv, title))
 
         return True
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class PageHeaderBlock(ThreeCellBlock):
-
     """
     A PageHeaderBlock appears at the top of every page.
     """
@@ -1873,10 +1790,10 @@ class PageHeaderBlock(ThreeCellBlock):
         return self.engine.pageHeader
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class PageFooterBlock(ThreeCellBlock):
-
     """
     A PageFooterBlock appears at the bottom of every page.
     """
@@ -1887,7 +1804,7 @@ class PageFooterBlock(ThreeCellBlock):
         """
         return self.engine.pageFooter
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Printing
 
     def CalculateBounds(self, dc):
@@ -1897,8 +1814,12 @@ class PageFooterBlock(ThreeCellBlock):
         # Draw the footer at the bottom of the page
         height = self.CalculateHeight(dc)
         bounds = list(self.GetWorkBounds())
-        return [RectUtils.Left(bounds), RectUtils.Bottom(bounds) - height,
-                RectUtils.Width(bounds), height]
+        return [
+            RectUtils.Left(bounds),
+            RectUtils.Bottom(bounds) - height,
+            RectUtils.Width(bounds),
+            height,
+        ]
 
     def ChangeWorkBoundsBy(self, height):
         """
@@ -1907,15 +1828,15 @@ class PageFooterBlock(ThreeCellBlock):
         RectUtils.MoveBottomBy(self.engine.workBounds, -height)
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class PageBreakBlock(Block):
-
     """
     A PageBreakBlock acts a page break.
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -1931,18 +1852,17 @@ class PageBreakBlock(Block):
 
         return True
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class RunningBlockPusher(Block):
-
     """
     A RunningBlockPusher pushes (or pops) a running block onto the stack when it is executed.
     """
 
     def __init__(self, block, push=True):
-        """
-        """
+        """ """
         self.block = block
         self.push = push
 
@@ -1959,11 +1879,11 @@ class RunningBlockPusher(Block):
 
         return True
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ListBlock(Block):
-
     """
     A ListBlock handles the printing of an entire ListCtrl.
     """
@@ -1972,7 +1892,7 @@ class ListBlock(Block):
         self.lv = lv
         self.title = title
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -1988,16 +1908,11 @@ class ListBlock(Block):
         # Break the list into vertical slices. Each one but the first will be placed on a
         # new page.
         first = True
-        for (left, right) in self.CalculateSlices(boundsWidth, cellWidths):
+        for left, right in self.CalculateSlices(boundsWidth, cellWidths):
             if not first:
                 self.engine.AddBlock(PageBreakBlock())
             self.engine.AddBlock(ListHeaderBlock(self.lv, self.title))
-            self.engine.AddBlock(
-                ListSliceBlock(
-                    self.lv,
-                    left,
-                    right,
-                    cellWidths))
+            self.engine.AddBlock(ListSliceBlock(self.lv, left, right, cellWidths))
             self.engine.AddBlock(ListFooterBlock(self.lv, ""))
             first = False
 
@@ -2011,9 +1926,8 @@ class ListBlock(Block):
         cellPadding = columnHeaderFmt.CalculateCellPadding()
         padding = cellPadding[0] + cellPadding[2]
         return [
-            self.lv.GetColumnWidth(i) +
-            padding for i in range(
-                self.lv.GetColumnCount())]
+            self.lv.GetColumnWidth(i) + padding for i in range(self.lv.GetColumnCount())
+        ]
 
     def CalculateSlices(self, maxWidth, columnWidths):
         """
@@ -2024,9 +1938,7 @@ class ListBlock(Block):
 
         # If a GroupListView has a column just for the expand/collapse, don't
         # include it
-        if hasattr(
-                self.lv,
-                "useExpansionColumn") and self.lv.useExpansionColumn:
+        if hasattr(self.lv, "useExpansionColumn") and self.lv.useExpansionColumn:
             firstColumn = 1
 
         # If we are shrinking to fit or all the columns fit, just return all
@@ -2038,7 +1950,7 @@ class ListBlock(Block):
         left = firstColumn
         right = firstColumn
         while right < len(columnWidths):
-            if (sum(columnWidths[left:right + 1])) > maxWidth:
+            if (sum(columnWidths[left : right + 1])) > maxWidth:
                 if left == right:
                     pairs.append([left, right])
                     left += 1
@@ -2055,10 +1967,10 @@ class ListBlock(Block):
         return pairs
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class ListHeaderBlock(TextBlock):
-
     """
     A ListHeaderBlock is the title that comes before an ListCtrl.
     """
@@ -2073,11 +1985,11 @@ class ListHeaderBlock(TextBlock):
         """
         return self.title
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ListFooterBlock(TextBlock):
-
     """
     A ListFooterBlock is the text that comes after an ListCtrl.
     """
@@ -2093,10 +2005,10 @@ class ListFooterBlock(TextBlock):
         return self.text
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class GroupTitleBlock(TextBlock):
-
     """
     A GroupTitleBlock is the title that comes before a list group.
     """
@@ -2111,11 +2023,11 @@ class GroupTitleBlock(TextBlock):
         """
         return self.group.title
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ListSliceBlock(Block):
-
     """
     A ListSliceBlock prints a vertical slice of an ListCtrl.
     """
@@ -2126,7 +2038,7 @@ class ListSliceBlock(Block):
         self.right = right
         self.allCellWidths = allCellWidths
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -2142,11 +2054,8 @@ class ListSliceBlock(Block):
             scale = 1
 
         headerBlock = ColumnHeaderBlock(
-            self.lv,
-            self.left,
-            self.right,
-            scale,
-            self.allCellWidths)
+            self.lv, self.left, self.right, scale, self.allCellWidths
+        )
         self.engine.AddBlock(headerBlock)
 
         if self.IsColumnHeadingsOnEachPage():
@@ -2157,19 +2066,13 @@ class ListSliceBlock(Block):
         if hasattr(self.lv, "GetShowGroups") and self.lv.GetShowGroups():
             self.engine.AddBlock(
                 GroupListRowsBlock(
-                    self.lv,
-                    self.left,
-                    self.right,
-                    scale,
-                    self.allCellWidths))
+                    self.lv, self.left, self.right, scale, self.allCellWidths
+                )
+            )
         else:
             self.engine.AddBlock(
-                ListRowsBlock(
-                    self.lv,
-                    self.left,
-                    self.right,
-                    scale,
-                    self.allCellWidths))
+                ListRowsBlock(self.lv, self.left, self.right, scale, self.allCellWidths)
+            )
 
         if self.IsColumnHeadingsOnEachPage():
             self.engine.AddBlock(RunningBlockPusher(headerBlock, False))
@@ -2180,12 +2083,7 @@ class ListSliceBlock(Block):
         """
         How much do we have to shrink our rows by to fit onto the page?
         """
-        block = ColumnHeaderBlock(
-            self.lv,
-            self.left,
-            self.right,
-            1,
-            self.allCellWidths)
+        block = ColumnHeaderBlock(self.lv, self.left, self.right, 1, self.allCellWidths)
         block.engine = self.engine
         rowWidth = block.CalculateWidth(dc)
         boundsWidth = RectUtils.Width(self.GetWorkBounds())
@@ -2195,11 +2093,11 @@ class ListSliceBlock(Block):
         else:
             return 1
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ColumnBasedBlock(CellBlock):
-
     """
     A ColumnBasedBlock is a cell block that takes its width from the
     columns of a ListCtrl.
@@ -2214,7 +2112,7 @@ class ColumnBasedBlock(CellBlock):
         self.scale = scale
         self.allCellWidths = allCellWidths
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing - Subclasses should override
 
     def GetListCtrl(self):
@@ -2229,20 +2127,16 @@ class ColumnBasedBlock(CellBlock):
         """
         # return [self.allCellWidths[i] for i in range(self.left,
         # self.right+1)]
-        return self.allCellWidths[self.left:self.right + 1]
+        return self.allCellWidths[self.left : self.right + 1]
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Utiltities
 
     def GetColumnAlignments(self, lv, left, right):
         """
         Return the alignments of the given slice of columns
         """
-        listAlignments = [
-            lv.GetColumn(i).GetAlign() for i in range(
-                left,
-                right +
-                1)]
+        listAlignments = [lv.GetColumn(i).GetAlign() for i in range(left, right + 1)]
         mapping = {
             wx.LIST_FORMAT_LEFT: wx.ALIGN_LEFT,
             wx.LIST_FORMAT_RIGHT: wx.ALIGN_RIGHT,
@@ -2251,23 +2145,24 @@ class ColumnBasedBlock(CellBlock):
         return [mapping[x] for x in listAlignments]
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class ColumnHeaderBlock(ColumnBasedBlock):
-
     """
     A ColumnHeaderBlock prints a portion of the columns header in a ListCtrl.
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetTexts(self):
         """
         Return a list of the texts that should be drawn with the cells
         """
-        return [self.lv.GetColumn(i).GetText()
-                for i in range(self.left, self.right + 1)]
+        return [
+            self.lv.GetColumn(i).GetText() for i in range(self.left, self.right + 1)
+        ]
 
     def GetAlignments(self):
         """
@@ -2301,17 +2196,16 @@ class ColumnHeaderBlock(ColumnBasedBlock):
         return False
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class ListRowsBlock(Block):
-
     """
     A ListRowsBlock prints rows of an ListCtrl.
     """
 
     def __init__(self, lv, left, right, scale, allCellWidths):
-        """
-        """
+        """ """
         self.lv = lv
         self.left = left
         self.right = right
@@ -2320,7 +2214,7 @@ class ListRowsBlock(Block):
         self.currentIndex = 0
         self.totalRows = self.lv.GetItemCount()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -2340,24 +2234,25 @@ class ListRowsBlock(Block):
                     self.left,
                     self.right,
                     self.scale,
-                    self.allCellWidths))
+                    self.allCellWidths,
+                )
+            )
             self.currentIndex += 1
             self.engine.AddBlock(self)
 
         return True
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class GroupListRowsBlock(Block):
-
     """
     A GroupListRowsBlock prints rows of an GroupListView.
     """
 
     def __init__(self, lv, left, right, scale, allCellWidths):
-        """
-        """
+        """ """
         self.lv = lv  # Must be a GroupListView
         self.left = left
         self.right = right
@@ -2367,7 +2262,7 @@ class GroupListRowsBlock(Block):
         self.currentIndex = 0
         self.totalRows = self.lv.GetItemCount()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def Print(self, dc):
@@ -2394,13 +2289,13 @@ class GroupListRowsBlock(Block):
                     self.left,
                     self.right,
                     self.scale,
-                    self.allCellWidths))
+                    self.allCellWidths,
+                )
+            )
         elif self.lv.innerList[self.currentIndex]:
             self.engine.AddBlock(
-                GroupTitleBlock(
-                    self.lv,
-                    self.lv.innerList[
-                        self.currentIndex]))
+                GroupTitleBlock(self.lv, self.lv.innerList[self.currentIndex])
+            )
 
         # Schedule the printing of the remaining rows
         self.currentIndex += 1
@@ -2409,10 +2304,10 @@ class GroupListRowsBlock(Block):
         return True
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class RowBlock(ColumnBasedBlock):
-
     """
     A RowBlock prints a vertical slice of a single row of an ListCtrl.
     """
@@ -2425,7 +2320,7 @@ class RowBlock(ColumnBasedBlock):
         self.scale = scale
         self.allCellWidths = allCellWidths
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def GetFont(self):
@@ -2480,7 +2375,7 @@ class RowBlock(ColumnBasedBlock):
         """
         return False
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Overrides for CellBlock
 
     def GetTexts(self):
@@ -2488,12 +2383,9 @@ class RowBlock(ColumnBasedBlock):
         Return a list of the texts that should be drawn with the cells
         """
         return [
-            self.lv.GetItem(
-                self.rowIndex,
-                i).GetText() for i in range(
-                self.left,
-                self.right +
-                1)]
+            self.lv.GetItem(self.rowIndex, i).GetText()
+            for i in range(self.left, self.right + 1)
+        ]
 
     def GetAlignments(self):
         """
@@ -2506,12 +2398,9 @@ class RowBlock(ColumnBasedBlock):
         Return a list of the images that should be drawn in each cell
         """
         return [
-            self.lv.GetItem(
-                self.rowIndex,
-                i).GetImage() for i in range(
-                self.left,
-                self.right +
-                1)]
+            self.lv.GetItem(self.rowIndex, i).GetImage()
+            for i in range(self.left, self.right + 1)
+        ]
 
     # def GetTexts(self):
     #    """
@@ -2535,10 +2424,10 @@ class RowBlock(ColumnBasedBlock):
     # self.right+1)]
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class Decoration(object):
-
     """
     A Decoration add some visual effect to a Block (e.g. borders,
     background image, watermark). They can also reserve a chunk of their Blocks
@@ -2553,7 +2442,7 @@ class Decoration(object):
 
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
 
     def IsDrawOver(self):
@@ -2563,7 +2452,7 @@ class Decoration(object):
         """
         return False
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def SubtractFrom(self, dc, bounds):
@@ -2578,11 +2467,11 @@ class Decoration(object):
         """
         pass
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class RectangleDecoration(Decoration):
-
     """
     A RectangleDecoration draw a rectangle around or on the side of a block.
 
@@ -2591,14 +2480,7 @@ class RectangleDecoration(Decoration):
 
     """
 
-    def __init__(
-            self,
-            side=None,
-            pen=None,
-            color=None,
-            toColor=None,
-            width=0,
-            space=0):
+    def __init__(self, side=None, pen=None, color=None, toColor=None, width=0, space=0):
         """
         If color is None, the rectangle will be hollow.
         If toColor is None, the rectangle will be filled with "color" otherwise it will be
@@ -2614,7 +2496,7 @@ class RectangleDecoration(Decoration):
         self.width = width
         self.space = space
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def SubtractFrom(self, dc, bounds):
@@ -2622,11 +2504,7 @@ class RectangleDecoration(Decoration):
         Subtract the space used by this decoration from the given bounds
         """
         if self.side is None:
-            return RectUtils.InsetBy(
-                RectUtils.InsetBy(
-                    bounds,
-                    self.space),
-                self.width)
+            return RectUtils.InsetBy(RectUtils.InsetBy(bounds, self.space), self.width)
 
         inset = self.space + self.width
         if self.side == wx.LEFT:
@@ -2649,14 +2527,16 @@ class RectangleDecoration(Decoration):
             if self.toColor is None:
                 dc.SetPen(wx.TRANSPARENT_PEN)
                 dc.SetBrush(wx.Brush(self.color))
-                dc.DrawRectangle(*rect)
+                dc.DrawRectangle(*RectUtils.Round(rect))
             else:
-                dc.GradientFillLinear(wx.Rect(*rect), self.color, self.toColor)
+                dc.GradientFillLinear(
+                    wx.Rect(RectUtils.Round(rect)), self.color, self.toColor
+                )
 
         if self.pen:
             dc.SetPen(self.pen)
             dc.SetBrush(wx.TRANSPARENT_BRUSH)
-            dc.DrawRectangle(*rect)
+            dc.DrawRectangle(*RectUtils.Round(rect))
 
     def _CalculateRect(self, bounds):
         """
@@ -2669,35 +2549,37 @@ class RectangleDecoration(Decoration):
                 RectUtils.Left(bounds),
                 RectUtils.Top(bounds),
                 self.width,
-                RectUtils.Height(bounds))
+                RectUtils.Height(bounds),
+            )
         if self.side == wx.RIGHT:
             return (
-                RectUtils.Right(bounds) -
-                self.width,
+                RectUtils.Right(bounds) - self.width,
                 RectUtils.Top(bounds),
                 self.width,
-                RectUtils.Height(bounds))
+                RectUtils.Height(bounds),
+            )
         if self.side == wx.TOP:
             return (
                 RectUtils.Left(bounds),
                 RectUtils.Top(bounds),
                 RectUtils.Width(bounds),
-                self.width)
+                self.width,
+            )
         if self.side == wx.BOTTOM:
             return (
                 RectUtils.Left(bounds),
-                RectUtils.Bottom(bounds) -
-                self.width,
+                RectUtils.Bottom(bounds) - self.width,
                 RectUtils.Width(bounds),
-                self.width)
+                self.width,
+            )
 
         return bounds
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class LineDecoration(Decoration):
-
     """
     A LineDecoration draws a line on the side of a decoration.
     """
@@ -2707,7 +2589,7 @@ class LineDecoration(Decoration):
         self.pen = pen
         self.space = space
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Commands
 
     def SubtractFrom(self, dc, bounds):
@@ -2749,13 +2631,13 @@ class LineDecoration(Decoration):
             pt2 = RectUtils.BottomRight(bounds)
 
         dc.SetPen(self.pen)
-        dc.DrawLine(pt1[0], pt1[1], pt2[0], pt2[1])
+        dc.DrawLine(round(pt1[0]), round(pt1[1]), round(pt2[0]), round(pt2[1]))
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class WatermarkDecoration(Decoration):
-
     """
     A WatermarkDecoration draws an angled line of text over each page.
 
@@ -2767,8 +2649,7 @@ class WatermarkDecoration(Decoration):
     """
 
     def __init__(self, text, font=None, color=None, angle=30, over=True):
-        """
-        """
+        """ """
         self.text = text
         self.color = color or wx.Color(128, 128, 128, 128)
         self.font = font or wx.FFont(128, wx.SWISS, 0)
@@ -2792,16 +2673,16 @@ class WatermarkDecoration(Decoration):
         cx, cy = RectUtils.Center(bounds)
         w, h = dc.GetTextExtent(self.text)
 
-        x = cx - w / 2
-        y = cy - h / 2 + (w / 2 * math.sin(math.radians(self.angle)))
+        x = round(cx - w / 2)
+        y = round(cy - (h + w * math.sin(math.radians(self.angle))) / 2)
 
         dc.DrawRotatedText(self.text, x, y, self.angle)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class ImageDecoration(Decoration):
-
     """
     A ImageDecoration draws an image over (or under) the given block.
 
@@ -2809,19 +2690,16 @@ class ImageDecoration(Decoration):
     """
 
     def __init__(
-            self,
-            image=None,
-            horizontalAlign=wx.CENTER,
-            verticalAlign=wx.CENTER,
-            over=True):
+        self, image=None, horizontalAlign=wx.CENTER, verticalAlign=wx.CENTER, over=True
+    ):
         """
         Default constructor
-        
+
         :param `image`: must be :class:`wx.Image` or :class:`wx.Bitmap`
         :param `horizontalAlign`: alignment flag
         :param `verticalAlign`: alignment flag
         :param boolean `over`: True to overprint
-        
+
         """
         self.horizontalAlign = horizontalAlign
         self.verticalAlign = verticalAlign
@@ -2829,7 +2707,7 @@ class ImageDecoration(Decoration):
 
         self.bitmap = image
         if isinstance(image, wx.Image):
-            if 'phoenix' in wx.PlatformInfo:
+            if "phoenix" in wx.PlatformInfo:
                 self.bitmap = wx.Bitmap(image)
             else:
                 self.bitmap = wx.BitmapFromImage(image)
@@ -2866,17 +2744,25 @@ class ImageDecoration(Decoration):
             # nicer handling of e.g. .png images, but doesn't work on preview
             mdc = wx.MemoryDC()
             mdc.SelectObject(self.bitmap)
-            dc.Blit(x, y, self.bitmap.GetWidth(), self.bitmap.GetHeight(),
-                    mdc, xsrc=0, ysrc=0, useMask=True)
-            mdc.SelectObject(wx.NullBitmap)         
+            dc.Blit(
+                x,
+                y,
+                self.bitmap.GetWidth(),
+                self.bitmap.GetHeight(),
+                mdc,
+                xsrc=0,
+                ysrc=0,
+                useMask=True,
+            )
+            mdc.SelectObject(wx.NullBitmap)
         else:
-            dc.DrawBitmap(self.bitmap, x, y, True)
+            dc.DrawBitmap(self.bitmap, round(x), round(y), True)
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class Bucket(object):
-
     """
     General purpose, hold-all data object
     """
@@ -2885,22 +2771,26 @@ class Bucket(object):
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        strs = ["%s=%r" % kv for kv in self.__dict__.items()]
-        return "Bucket(" + ", ".join(strs) + ")"
+        strs = [f"{kv!s}={kv!r}" for kv in self.__dict__.items()]
+        return f"Bucket({', '.join(strs)})"
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class RectUtils:
-
     """
     Static rectangle utilities.
 
     Rectangles are a list or tuple of 4-elements: [left, top, width, height]
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Accessing
+
+    @staticmethod
+    def Round(r):
+        return [round(x) for x in r]
 
     @staticmethod
     def Left(r):
@@ -2954,7 +2844,7 @@ class RectUtils:
     def Center(r):
         return [r[0] + r[2] / 2, r[1] + r[3] / 2]
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Modifying
 
     @staticmethod
@@ -2999,7 +2889,7 @@ class RectUtils:
         r[3] += delta
         return r
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculations
 
     @staticmethod
@@ -3009,7 +2899,7 @@ class RectUtils:
         try:
             delta[0]  # is it indexable?
             return RectUtils.InsetRect(r, delta)
-        except IndexError:
+        except (TypeError, IndexError):
             return RectUtils.InsetRect(r, (delta, delta, delta, delta))
 
     @staticmethod
@@ -3017,10 +2907,12 @@ class RectUtils:
         if r2 is None:
             return r
         else:
-            return [r[0] + r2[0],
-                    r[1] + r2[1],
-                    r[2] - (r2[0] + r2[2]),
-                    r[3] - (r2[1] + r2[3])]
+            return [
+                r[0] + r2[0],
+                r[1] + r2[1],
+                r[2] - (r2[0] + r2[2]),
+                r[3] - (r2[1] + r2[3]),
+            ]
 
     @staticmethod
     def MultiplyOrigin(r, factor):

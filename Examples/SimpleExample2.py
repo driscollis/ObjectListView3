@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-import datetime
 import wx
 
 # Where can we find the ObjectListView module?
 import sys
 sys.path.append("..")
 
-import ObjectListView as OLV
-from ObjectListView import ObjectListView, ColumnDefn
+import ObjectListView3 as OLV                                       # noqa: E402
 
-import ExampleModel
-import ExampleImages # We store our images as python code
+import ExampleModel                                                 # noqa: E402
+import ExampleImages # We store our images as python code           # noqa: E402
 
 
 class MyFrame(wx.Frame):
@@ -34,7 +32,7 @@ class MyFrame(wx.Frame):
         sizer_1.Add(panel, 1, wx.ALL|wx.EXPAND)
         self.SetSizer(sizer_1)
 
-        self.myOlv = ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
+        self.myOlv = OLV.ObjectListView(panel, -1, style=wx.LC_REPORT|wx.SUNKEN_BORDER)
         sizer_2 = wx.BoxSizer(wx.VERTICAL)
         sizer_2.Add(self.myOlv, 1, wx.ALL|wx.EXPAND, 4)
         panel.SetSizer(sizer_2)
@@ -60,25 +58,25 @@ class MyFrame(wx.Frame):
             """
             for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
                 if byteCount >= cutoff:
-                    return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                    return f"{(byteCount * 1.0 / cutoff):.1f} {label}")
 
             if byteCount == 1:
                 return "1 byte"
             else:
-                return "%d bytes" % byteCount
+                return f"{byteCount} bytes"
 
         self.myOlv.SetColumns([
-            ColumnDefn("Title", "left", 120, "title", imageGetter=musicImage),
-            ColumnDefn("Artist", "left", 120, "artist", imageGetter=artistImageGetter),
-            ColumnDefn("Size", "center", 100, "sizeInBytes", stringConverter=sizeToNiceString),
-            ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
-            ColumnDefn("Rating", "center", 100, "rating")
+            OLV.ColumnDefn("Title", "left", 120, "title", imageGetter=musicImage),
+            OLV.ColumnDefn("Artist", "left", 120, "artist", imageGetter=artistImageGetter),
+            OLV.ColumnDefn("Size", "center", 100, "sizeInBytes", stringConverter=sizeToNiceString),
+            OLV.ColumnDefn("Last Played", "left", 100, "lastPlayed", stringConverter="%d-%m-%Y"),
+            OLV.ColumnDefn("Rating", "center", 100, "rating")
         ])
         self.myOlv.SetObjects(self.songs)
 
 if __name__ == '__main__':
-    print("Using {} ({}) from {}".format(OLV.__name__, OLV.__version__, OLV.__path__))
+    print(f"Using {OLV.__name__} ({OLV.__version__}) from {OLV.__path}.")
     app = wx.App()
-    frame = MyFrame(None, -1, "{} ({}) Simple Example 2".format(OLV.__name__, OLV.__version__))
+    frame = MyFrame(None, -1, f"{OLV.__name__} ({OLV.__version__}) Simple Example 2")
     frame.Show()
     app.MainLoop()

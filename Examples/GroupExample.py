@@ -8,10 +8,10 @@ import wx
 import sys
 sys.path.append("..")
 
-from ObjectListView import GroupListView, ColumnDefn
+from ObjectListView3 import GroupListView, ColumnDefn               # noqa: E402
 
-import ExampleModel
-import ExampleImages # We store our images as python code
+import ExampleModel                                                 # noqa: E402
+import ExampleImages # We store our images as python code           # noqa: E402
 
 
 class MyFrame(wx.Frame):
@@ -41,9 +41,9 @@ class MyFrame(wx.Frame):
         self.Layout()
 
     def InitObjectListView(self):
-        groupImage = self.myOlv.AddImages(ExampleImages.getGroup16Bitmap(), ExampleImages.getGroup32Bitmap())
-        userImage = self.myOlv.AddImages(ExampleImages.getUser16Bitmap(), ExampleImages.getUser32Bitmap())
-        musicImage = self.myOlv.AddImages(ExampleImages.getMusic16Bitmap(), ExampleImages.getMusic32Bitmap())
+        groupImage = self.myOlv.AddImages(ExampleImages.Group16.GetBitmap(), ExampleImages.Group32.GetBitmap())
+        userImage = self.myOlv.AddImages(ExampleImages.User16.GetBitmap(), ExampleImages.User32.GetBitmap())
+        musicImage = self.myOlv.AddImages(ExampleImages.Music16.GetBitmap(), ExampleImages.Music32.GetBitmap())
 
         soloArtists = ["Nelly Furtado", "Missy Higgins", "Moby", "Natalie Imbruglia",
                        "Dido", "Paul Simon", "Bruce Cockburn"]
@@ -59,12 +59,12 @@ class MyFrame(wx.Frame):
             """
             for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
                 if byteCount >= cutoff:
-                    return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                    return f"{(byteCount * 1.0 / cutoff):.1f} {label}")
 
             if byteCount == 1:
                 return "1 byte"
             else:
-                return "%d bytes" % byteCount
+                return f"{byteCount} bytes"
 
         def lastPlayedGroupKey(track):
             """
