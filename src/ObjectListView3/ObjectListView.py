@@ -527,8 +527,8 @@ class ObjectListView(wx.ListCtrl):
 
     def AddObject(self, modelObject):
         warnings.warn(
-            "'AddObject()' is deprecated, use 'AppendObject()'",
-            DeprecationWarning)
+            "'AddObject()' is deprecated, use 'AppendObject()'", DeprecationWarning
+        )
         self.AppendObject(modelObject)
 
     def ExtendObjects(self, modelObjects):
@@ -557,8 +557,8 @@ class ObjectListView(wx.ListCtrl):
 
     def AddObjects(self, modelObjects):
         warnings.warn(
-            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
-            DeprecationWarning)
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'", DeprecationWarning
+        )
         self.ExtendObjects(modelObjects)
 
     def InsertObject(self, modelPosition, modelObject, before=False):
@@ -576,7 +576,7 @@ class ObjectListView(wx.ListCtrl):
 
         try:
             self.Freeze()
-            idx = self.innerList.index(modelPosition)   # Might throw a ValueError
+            idx = self.innerList.index(modelPosition)  # Might throw a ValueError
             if not before:
                 idx += 1
             self.modelObjects[idx:idx] = modelObjects
@@ -2502,8 +2502,8 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
 
     def AddObjects(self, modelObjects):
         warnings.warn(
-            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
-            DeprecationWarning)
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'", DeprecationWarning
+        )
         self.AppendObject(modelObjects)
 
     def InsertObjects(self, modelPosition, modelObjects, before=False):
@@ -2603,8 +2603,8 @@ class FastObjectListView(AbstractVirtualObjectListView):
 
     def AddObjects(self, modelObjects):
         warnings.warn(
-            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
-            DeprecationWarning)
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'", DeprecationWarning
+        )
         self.ExtendObjects(modelObjects)
 
     def RepopulateList(self):
@@ -2857,8 +2857,8 @@ class GroupListView(FastObjectListView):
 
     def AddObjects(self, modelObjects):
         warnings.warn(
-            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
-            DeprecationWarning)
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'", DeprecationWarning
+        )
         self.ExtendObjects(modelObjects)
 
     def InsertObjects(self, modelPosition, modelObjects, before=False):
@@ -2867,7 +2867,8 @@ class GroupListView(FastObjectListView):
         """
         self.groups = None
         FastObjectListView.InsertObjects(
-            self, modelPosition, modelObjects, before=before)
+            self, modelPosition, modelObjects, before=before
+        )
 
     def CreateCheckStateColumn(self, columnIndex=0):
         """
@@ -4185,8 +4186,8 @@ class BatchedUpdate(object):
 
     def AddObject(self, modelObject):
         warnings.warn(
-            "'AddObject()' is deprecated, use 'AppendObject()'",
-            DeprecationWarning)
+            "'AddObject()' is deprecated, use 'AppendObject()'", DeprecationWarning
+        )
         self.AppendObject(modelObject)
 
     def ExtendObjects(self, modelObjects):
@@ -4209,8 +4210,8 @@ class BatchedUpdate(object):
 
     def AddObjects(self, modelObject):
         warnings.warn(
-            "'AddObjects()' is deprecated, use 'ExtendObjects()'",
-            DeprecationWarning)
+            "'AddObjects()' is deprecated, use 'ExtendObjects()'", DeprecationWarning
+        )
         self.ExtendObjects(modelObject)
 
     def InsertObjects(self, modelPosition, modelObjects, before=False):
@@ -4219,7 +4220,8 @@ class BatchedUpdate(object):
         """
         if self.freezeUntil < time.process_time_ns():
             self.objectListView.InsertObjects(
-                modelPosition, modelObjects, before=before)
+                modelPosition, modelObjects, before=before
+            )
             self.freezeUntil = time.clock() + self.updatePeriod
             return
 
@@ -4301,7 +4303,8 @@ class BatchedUpdate(object):
 
         for (modelPosition, before), modelObjects in self.objectsToInsert.items():
             self.objectListView.InsertObjects(
-                modelPosition, modelObjects, before=before)
+                modelPosition, modelObjects, before=before
+            )
 
         if self.objectsToRemove:
             self.objectListView.RemoveObjects(
