@@ -576,7 +576,6 @@ class ObjectListView(wx.ListCtrl):
 
         try:
             self.Freeze()
-            originalSize = len(self.innerList)
             idx = self.innerList.index(modelPosition)   # Might throw a ValueError
             if not before:
                 idx += 1
