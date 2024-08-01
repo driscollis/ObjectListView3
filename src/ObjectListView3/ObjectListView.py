@@ -556,6 +556,23 @@ class ObjectListView(wx.ListCtrl):
         finally:
             self.Thaw()
 
+    def ReplaceObject(self, modelOldObject, modelObject):
+        """
+        Replace the old object with a new one.
+        """
+        try:
+            self.Freeze()
+            idx = self.innerList.index(modelOldObject)
+            self.modelObjects[idx] = modelObject
+            self._BuildInnerList()
+            item = wx.ListItem()
+            item.SetColumn(0)
+            item.Clear()
+            self._InsertUpdateItem(item, idx, modelObject, False)
+            self._SortItemsNow()
+        finally:
+            self.Thaw()
+
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
         Add the given images (:class:`wx.Bitmap <wx:Bitmap>`) to the list of available images. Return the index of the image.
@@ -797,10 +814,8 @@ class ObjectListView(wx.ListCtrl):
         self._InsertUpdateItem(self.GetItem(index), index, modelObject, False)
 
     def _InsertUpdateItem(self, listItem, index, modelObject, isInsert):
-        if isInsert:
-            listItem.SetId(index)
-            listItem.SetData(index)
-
+        listItem.SetId(index)
+        listItem.SetData(index)
         listItem.SetText(self.GetStringValueAt(modelObject, 0))
         listItem.SetImage(self.GetImageAt(modelObject, 0))
         self._FormatOneItem(listItem, index, modelObject)
@@ -2484,6 +2499,15 @@ class VirtualObjectListView(AbstractVirtualObjectListView):
         """
         pass
 
+    def ReplaceObject(self, modelOldObject, modelObject):
+        """
+        Replace the old object with a new one.
+
+        This cannot work for virtual lists since the source of model objects is not
+        under the control of the VirtualObjectListView.
+        """
+        pass
+
     def RemoveObjects(self, modelObjects):
         """
         Remove the given collections of objects from our collection of objects.
@@ -2570,6 +2594,22 @@ class FastObjectListView(AbstractVirtualObjectListView):
 
         if first < self.GetItemCount():
             self.RefreshItems(first, self.GetItemCount() - 1)
+
+    def ReplaceObject(self, modelOldObject, modelObject):
+        """
+        Replace the old objects with a new one.
+        """
+        idx = self.innerList.index(modelOldObject)
+        self.modelObjects[idx] = modelObject
+        # We don't want to call RepopulateList() here since that makes the whole
+        # control redraw, which flickers slightly, which I *really* hate! So we
+        # most of the work of RepopulateList() but only redraw the replaced
+        # object.
+        self._SortObjects()
+        self._BuildInnerList()
+        self.SetItemCount(len(self.innerList))
+
+        self.RefreshItems(idx, idx)
 
     def RepopulateList(self):
         """
@@ -2825,6 +2865,14 @@ class GroupListView(FastObjectListView):
         """
         self.groups = None
         FastObjectListView.AddObjects(self, modelObjects)
+
+    def ReplaceObject(self, modelOldObject, modelObject):
+        """
+        Replace the old object with a new one.
+        """
+        self.groups = None
+        FastObjectListView.ReplaceObject(
+            self, modelOldObject, modelObject)
 
     def CreateCheckStateColumn(self, columnIndex=0):
         """
