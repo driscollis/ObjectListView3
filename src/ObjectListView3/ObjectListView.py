@@ -602,7 +602,10 @@ class ObjectListView(wx.ListCtrl):
             item.SetColumn(0)
             for i in range(idx, len(modelObjects)):
                 item.Clear()
-                self._InsertUpdateItem(item, i, modelObjects[i], True)      
+                self._InsertUpdateItem(item, i, modelObjects[i], True)
+            self._SortItemsNow()
+        finally:
+            self.Thaw()    
 
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
