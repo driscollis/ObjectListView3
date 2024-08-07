@@ -605,8 +605,8 @@ class ObjectListView(wx.ListCtrl):
                 self._InsertUpdateItem(item, i, modelObjects[i], True)
             self._SortItemsNow()
         finally:
-            self.Thaw()    
-
+            self.Thaw()
+           
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
         Add the given images (:class:`wx.Bitmap <wx:Bitmap>`) to the list of available images. Return the index of the image.
