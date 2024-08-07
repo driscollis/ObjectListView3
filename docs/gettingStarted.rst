@@ -223,8 +223,9 @@ last played, size (in megabytes) and rating of various tracks in your music
 library. But, actually, we have quite a bit more than that.
 
 Without any extra work, sorting just works. Clicking on the column headers will
-sort and reverse sort the rows. The sort is accurate for the data type: when
-sorting by size, a song of 35 megabytes will come after a song of 9 megabytes.
+sort and reverse sort the rows; right clicking will cancel sorting. The sort is
+accurate for the data type: when sorting by size, a song of 35 megabytes will
+come after a song of 9 megabytes.
 
 The control also understands 'model object' level operations. So, we can ask the
 control for the tracks that are selected (via the `GetSelectedObjects` method).
@@ -300,11 +301,11 @@ To do this, we can set the `stringConverter` attribute to be a callable, like th
     def sizeToNiceString(byteCount):
         for (cutoff, label) in [(1024*1024*1024, "GB"), (1024*1024, "MB"), (1024, "KB")]:
             if byteCount >= cutoff:
-                return "%.1f %s" % (byteCount * 1.0 / cutoff, label)
+                return f"{(byteCount * 1.0 / cutoff):.1f} {label}"
         if byteCount == 1:
             return "1 byte"
         else:
-            return "%d bytes" % byteCount
+            return f"{byteCount} bytes"
 
     sizeColumn = ColumnDefn("Size", "center", 100, "sizeInBytes", stringConverter=sizeToNiceString)
 

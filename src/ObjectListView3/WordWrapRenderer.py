@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Name:         WordWrapRenderer.py
 # Author:       Phillip Piper
 # Created:      25 July 2008
 # Copyright:    (c) 2008 by Phillip Piper, 2008
 # License:      wxWindows license
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Change log:
 # 2008/07/25  JPP   Initial version
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # To do:
 
 """
@@ -30,13 +30,12 @@ from wx.lib.wordwrap import wordwrap
 
 
 class WordWrapRenderer:
-
     """
     This renderer encapsulates the logic need to draw and measure a word-wrapped
     string within a given rectangle.
     """
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Calculating
 
     @staticmethod
@@ -51,23 +50,19 @@ class WordWrapRenderer:
         # Our simple, but not always accurate, is to remove trailing spaces.
         # This won't catch single trailing space imbedded in a multiline
         # string.
-        text = text.rstrip(' ')
+        text = text.rstrip(" ")
 
         lines = wordwrap(text, width, dc, True)
         (width, height, descent, externalLeading) = dc.GetFullTextExtent("Wy")
         return (lines.count("\n") + 1) * (height + externalLeading)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Rendering
 
     @staticmethod
     def DrawString(
-            dc,
-            text,
-            bounds,
-            align=wx.ALIGN_LEFT,
-            valign=wx.ALIGN_TOP,
-            allowClipping=False):
+        dc, text, bounds, align=wx.ALIGN_LEFT, valign=wx.ALIGN_TOP, allowClipping=False
+    ):
         """
         Draw the given text word-wrapped within the given bounds.
 
@@ -99,20 +94,21 @@ class WordWrapRenderer:
         # Our simple, but not always accurate, is to remove trailing spaces.
         # This won't catch single trailing space imbedded in a multiline
         # string.
-        text = text.rstrip(' ')
+        text = text.rstrip(" ")
 
         lines = wordwrap(text, bounds[2], dc, True)
         dc.DrawLabel(lines, bounds, align | valign)
 
     @staticmethod
     def DrawTruncatedString(
-            dc,
-            text,
-            bounds,
-            align=wx.ALIGN_LEFT,
-            valign=wx.ALIGN_TOP,
-            ellipse=wx.RIGHT,
-            ellipseChars="..."):
+        dc,
+        text,
+        bounds,
+        align=wx.ALIGN_LEFT,
+        valign=wx.ALIGN_TOP,
+        ellipse=wx.RIGHT,
+        ellipseChars="...",
+    ):
         """
         Draw the given text truncated to the given bounds.
 
@@ -134,12 +130,7 @@ class WordWrapRenderer:
             bounds = wx.Rect(*bounds)
         except Exception:
             pass
-        lines = WordWrapRenderer._Truncate(
-            dc,
-            text,
-            bounds[2],
-            ellipse,
-            ellipseChars)
+        lines = WordWrapRenderer._Truncate(dc, text, bounds[2], ellipse, ellipseChars)
         dc.DrawLabel(lines, bounds, align | valign)
 
     @staticmethod
@@ -163,12 +154,12 @@ class WordWrapRenderer:
 
         if ellipse == wx.LEFT:
             i = bisect.bisect(pte, stringWidth - maxWidthMinusEllipse)
-            return ellipseChars + line[i + 1:]
+            return ellipseChars + line[i + 1 :]
 
         if ellipse == wx.CENTER:
             i = bisect.bisect(pte, maxWidthMinusEllipse / 2)
             j = bisect.bisect(pte, stringWidth - maxWidthMinusEllipse / 2)
-            return line[:i] + ellipseChars + line[j + 1:]
+            return line[:i] + ellipseChars + line[j + 1 :]
 
         if ellipse == wx.RIGHT:
             i = bisect.bisect(pte, maxWidthMinusEllipse)
@@ -178,17 +169,16 @@ class WordWrapRenderer:
         i = bisect.bisect(pte, maxWidth)
         return line[:i]
 
-#======================================================================
-# TESTING ONLY
-#======================================================================
 
-if __name__ == '__main__':
+# ======================================================================
+# TESTING ONLY
+# ======================================================================
+
+if __name__ == "__main__":
 
     class TestPanel(wx.Panel):
-
         def __init__(self, parent):
-            wx.Panel.__init__(
-                self, parent, -1, style=wx.FULL_REPAINT_ON_RESIZE)
+            wx.Panel.__init__(self, parent, -1, style=wx.FULL_REPAINT_ON_RESIZE)
             self.Bind(wx.EVT_PAINT, self.OnPaint)
 
             self.text = """This is Thisisareallylongwordtoseewhathappens the text to be drawn. It needs to be long to see if wrapping works.  to long words.
@@ -198,11 +188,8 @@ This should have a blank line in front of it but still wrap when we reach the ed
 
 The bottom of the red rectangle should be immediately below this."""
             self.font = wx.Font(
-                12,
-                wx.SWISS,
-                wx.NORMAL,
-                wx.NORMAL,
-                faceName="Gill Sans")
+                12, wx.SWISS, wx.NORMAL, wx.NORMAL, faceName="Gill Sans"
+            )
 
         def OnPaint(self, evt):
             dc = wx.PaintDC(self)
@@ -211,7 +198,8 @@ The bottom of the red rectangle should be immediately below this."""
                 inset[0],
                 inset[1],
                 self.GetSize().width - (inset[0] + inset[2]),
-                self.GetSize().height - (inset[1] + inset[3])]
+                self.GetSize().height - (inset[1] + inset[3]),
+            ]
 
             # Calculate exactly how high the wrapped is going to be and put a
             # frame around it.
@@ -223,21 +211,20 @@ The bottom of the red rectangle should be immediately below this."""
             # WordWrapRenderer.DrawTruncatedString(dc, self.text, rect,
             # wx.ALIGN_CENTER_HORIZONTAL,s ellipse=wx.CENTER)
 
-            #bmp = wx.EmptyBitmap(rect[0]+rect[2], rect[1]+rect[3])
-            #mdc = wx.MemoryDC(bmp)
+            # bmp = wx.EmptyBitmap(rect[0]+rect[2], rect[1]+rect[3])
+            # mdc = wx.MemoryDC(bmp)
             # mdc.SetBackground(wx.Brush("white"))
             # mdc.Clear()
             # mdc.SetFont(self.font)
             # mdc.SetPen(wx.RED_PEN)
-            #rect[3] = WordWrapRenderer.CalculateHeight(mdc, self.text, rect[2])
+            # rect[3] = WordWrapRenderer.CalculateHeight(mdc, self.text, rect[2])
             # mdc.DrawRectangle(*rect)
-            #WordWrapRenderer.DrawString(mdc, self.text, rect, wx.ALIGN_LEFT)
-            #del mdc
-            #dc = wx.ScreenDC()
-            #dc.DrawBitmap(bmp, 20, 20)
+            # WordWrapRenderer.DrawString(mdc, self.text, rect, wx.ALIGN_LEFT)
+            # del mdc
+            # dc = wx.ScreenDC()
+            # dc.DrawBitmap(bmp, 20, 20)
 
     class MyFrame(wx.Frame):
-
         def __init__(self, *args, **kwds):
             kwds["style"] = wx.DEFAULT_FRAME_STYLE
             wx.Frame.__init__(self, *args, **kwds)

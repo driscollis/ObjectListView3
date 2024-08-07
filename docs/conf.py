@@ -15,41 +15,43 @@ import sys
 import os
 
 # following is needed as RTD is not supporting e.g. wxPython to be installed
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
 # only import and set the theme if we're building docs locally
 if not on_rtd:
-	import sphinx_rtd_theme
-	html_theme = 'sphinx_rtd_theme'
-	html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-	print(html_theme_path)
+    import sphinx_rtd_theme
+
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    print(html_theme_path)
 
 # do some mocking when on RTD
 if on_rtd:
-	import sys
-	from unittest.mock import MagicMock
+    import sys
+    from unittest.mock import MagicMock
 
-	class Mock(MagicMock):
-		@classmethod
-		def __getattr__(cls, name):
-			return Mock()
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+            return Mock()
 
-	MOCK_MODULES = ['wx', 'wx.lib', 'wx.lib.wordwrap']
-	sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+    MOCK_MODULES = ["wx", "wx.lib", "wx.lib.wordwrap"]
+    sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-	import wx
-	wx.TextCtrl = object
-	wx.Choice = object
-	wx.PyCommandEvent = object
-	wx.ListCtrl = object
-	wx.PlatformInfo = []
+    import wx
 
-	import wx.lib
-	def mockWrap():
-		pass
-	wx.lib.wordwrap.wordwrap = mockWrap
+    wx.TextCtrl = object
+    wx.Choice = object
+    wx.PyCommandEvent = object
+    wx.ListCtrl = object
+    wx.PlatformInfo = []
 
+    import wx.lib
 
+    def mockWrap():
+        pass
+
+    wx.lib.wordwrap.wordwrap = mockWrap
 
 
 sys.path.append(os.path.abspath(".."))
@@ -57,62 +59,62 @@ sys.path.append(os.path.abspath(".."))
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-#sys.path.append(os.path.abspath("sphinxext"))
+# sys.path.append(os.path.abspath("sphinxext"))
 
 # General configuration
 # ---------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['.templates']
+templates_path = [".templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General substitutions.
-project = 'ObjectListView'
-copyright = '2008, Phillip Piper'
+project = "ObjectListView"
+copyright = "2008, Phillip Piper"
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
 #
 # The short X.Y version.
-version = '1.3'
+version = "1.3"
 # The full version, including alpha/beta/rc tags.
-release = '1.3'
+release = "1.3"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-#today = ''
+# today = ''
 # Else, today_fmt is used as the format for a strftime call.
-today_fmt = '%B %d, %Y'
+today_fmt = "%B %d, %Y"
 
 # List of documents that shouldn't be included in the build.
-#unused_docs = []
+# unused_docs = []
 
 # List of directories, relative to source directories, that shouldn't be searched
 # for source files.
-#exclude_dirs = []
+# exclude_dirs = []
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+# add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+# show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 
 # Options for HTML output
@@ -121,35 +123,35 @@ pygments_style = 'sphinx'
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
 # given in html_static_path.
-#html_style = 'master.css'
+# html_style = 'master.css'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+# html_title = None
 
 # The name of an image file (within the static path) to place at the top of
 # the sidebar.
-#html_logo = None
+# html_logo = None
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['.static']
+html_static_path = [".static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
 html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+# html_sidebars = {}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+# html_additional_pages = {}
 
 # If false, no module index is generated.
 html_use_modindex = False
@@ -160,46 +162,51 @@ html_copy_source = True
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
-#html_use_opensearch = ''
+# html_use_opensearch = ''
 
 # If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
-#html_file_suffix = ''
+# html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ObjectListViewDoc'
+htmlhelp_basename = "ObjectListViewDoc"
 
 
 # Options for LaTeX output
 # ------------------------
 
 # The paper size ('letter' or 'a4').
-#latex_paper_size = 'a4'
+# latex_paper_size = 'a4'
 
 # The font size ('10pt', '11pt' or '12pt').
-#latex_font_size = '11pt'
+# latex_font_size = '11pt'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-    ('index', 'ObjectListView.tex', 'ObjectListView Documentation', 'Phillip Piper', 'manual'),
+    (
+        "index",
+        "ObjectListView.tex",
+        "ObjectListView Documentation",
+        "Phillip Piper",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+# latex_logo = None
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-#latex_use_parts = False
+# latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+# latex_preamble = ''
 
 # Documents to append as an appendix to all manuals.
-#latex_appendices = []
+# latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+# latex_use_modindex = True
 
-intersphinx_mapping = {'wx': ('http://wxpython.org/Phoenix/docs/html', None)}
-
+intersphinx_mapping = {"wx": ("http://wxpython.org/Phoenix/docs/html", None)}

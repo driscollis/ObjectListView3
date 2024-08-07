@@ -71,6 +71,8 @@ user clicks on a column header. This sorting understands the data type of the co
 sorting is always correct according to the data type. Sorting does not use the string
 representation.
 
+Sorting can be canceled by right-clicking on the column header.
+
 
 Supports all ListCtrl views
 ---------------------------

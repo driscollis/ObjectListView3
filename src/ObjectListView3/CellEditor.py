@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Name:         CellEditor.py
 # Author:       Phillip Piper
 # Created:      3 April 2008
 # Copyright:    (c) 2008 by Phillip Piper, 2008
 # License:      wxWindows license
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Change log:
 # 2009/06/09  JPP   All cell editors start life 0 sized to prevent flickering
 # 2008/05/26  JPP   Fixed pyLint annoyances
 # 2008/04/04  JPP   Initial version complete
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # To do:
 # - there has to be a better DateTimeEditor somewhere!!
 
@@ -53,8 +53,7 @@ import wx
 from wx.adv import DatePickerCtrl
 
 
-
-#======================================================================
+# ======================================================================
 # Editor Registry
 
 # Module level variable
@@ -74,7 +73,6 @@ def CellEditorRegistry():
 
 
 class EditorRegistry:
-
     """
     An *EditorRegistry* manages a mapping of types onto creator functions.
 
@@ -118,7 +116,7 @@ class EditorRegistry:
         """
         self.typeToFunctionMap[aType] = aFunction
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Creator functions for standard types
 
     @staticmethod
@@ -140,9 +138,8 @@ class EditorRegistry:
     @staticmethod
     def _MakeFloatEditor(olv, rowIndex, subItemIndex):
         return FloatEditor(
-            olv,
-            subItemIndex,
-            validator=NumericValidator("0123456789-+eE."))
+            olv, subItemIndex, validator=NumericValidator("0123456789-+eE.")
+        )
 
     @staticmethod
     def _MakeDateTimeEditor(olv, rowIndex, subItemIndex):
@@ -156,9 +153,7 @@ class EditorRegistry:
 
     @staticmethod
     def _MakeDateEditor(olv, rowIndex, subItemIndex):
-        dte = DateEditor(
-            olv,
-            style=wx.DP_DROPDOWN | wx.DP_SHOWCENTURY | wx.WANTS_CHARS)
+        dte = DateEditor(olv, style=wx.DP_DROPDOWN | wx.DP_SHOWCENTURY | wx.WANTS_CHARS)
         # dte.SetValidator(MyValidator(olv))
         return dte
 
@@ -172,12 +167,12 @@ class EditorRegistry:
 
         return editor
 
-#======================================================================
+
+# ======================================================================
 # Cell editors
 
 
 class BooleanEditor(wx.Choice):
-
     """This is a simple editor to edit a boolean value that can be used in an
     ObjectListView"""
 
@@ -196,11 +191,11 @@ class BooleanEditor(wx.Choice):
         else:
             self.Select(1)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class BaseCellTextEditor(wx.TextCtrl):
-
     """This is a base text editor for text-like editors used in an ObjectListView"""
 
     def __init__(self, olv, subItemIndex, **kwargs):
@@ -208,21 +203,23 @@ class BaseCellTextEditor(wx.TextCtrl):
         # Allow for odd case where parent isn't an ObjectListView
         if hasattr(olv, "columns"):
             if olv.HasFlag(wx.LC_ICON):
-                style |= (wx.TE_CENTRE | wx.TE_MULTILINE)
+                style |= wx.TE_CENTRE | wx.TE_MULTILINE
             else:
                 style |= olv.columns[subItemIndex].GetAlignmentForText()
-        super(BaseCellTextEditor, self).__init__(olv, style=style, size=(0, 0), **kwargs)
+        super(BaseCellTextEditor, self).__init__(
+            olv, style=style, size=(0, 0), **kwargs
+        )
 
         # With the MULTILINE flag, the text control always has a vertical
         # scrollbar, which looks stupid. I don't know how to get rid of it.
         # This doesn't do it:
         # self.ToggleWindowStyle(wx.VSCROLL)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class IntEditor(BaseCellTextEditor):
-
     """This is a text editor for integers for use in an ObjectListView"""
 
     def GetValue(self):
@@ -239,11 +236,11 @@ class IntEditor(BaseCellTextEditor):
             value = repr(value)
         super(IntEditor, self).SetValue(value)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class LongEditor(BaseCellTextEditor):
-
     """This is a text editor for long values for use in an ObjectListView"""
 
     def GetValue(self):
@@ -260,11 +257,11 @@ class LongEditor(BaseCellTextEditor):
             value = repr(value)
         super(LongEditor, self).SetValue(value)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class FloatEditor(BaseCellTextEditor):
-
     """This is a text editor for floats for use in an ObjectListView.
 
     Because of the trouble of precisely converting floats to strings,
@@ -284,11 +281,11 @@ class FloatEditor(BaseCellTextEditor):
             value = repr(value)
         super(FloatEditor, self).SetValue(value)
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class DateTimeEditor(BaseCellTextEditor):
-
     """
     A DateTimeEditor allows the user to enter a date/time combination, where the time is optional
     and many formats of date and time are allowed.
@@ -315,42 +312,40 @@ class DateTimeEditor(BaseCellTextEditor):
 
     The implementation uses a brute force approach to parsing the data.
     """
+
     # Acceptable formats:
     # '31/12/2008', '2008/12/31', '12/31/2008', '31 December 2008', '31 Dec 2008', 'Dec 31 2007'
     # second line is the same but with two-digit year.
     # slash character can also be '-' or ' '. Consecutive whitespace are
     # collapsed.
     STD_DATE_FORMATS = [
-        '%d %m %Y',
-        '%Y %m %d',
-        '%m %d %Y',
-        '%d %B %Y',
-        '%d %b %Y',
-        '%b %d %Y',
-        '%B %d %Y',
-        '%d %m %y',
-        '%y %m %d',
-        '%m %d %y',
-        '%d %B %y',
-        '%d %b %y',
-        '%b %d %y',
-        '%B %d %y']
+        "%d %m %Y",
+        "%Y %m %d",
+        "%m %d %Y",
+        "%d %B %Y",
+        "%d %b %Y",
+        "%b %d %Y",
+        "%B %d %Y",
+        "%d %m %y",
+        "%y %m %d",
+        "%m %d %y",
+        "%d %B %y",
+        "%d %b %y",
+        "%b %d %y",
+        "%B %d %y",
+    ]
 
     STD_DATE_WITHOUT_YEAR_FORMATS = [
-        '%d %m',
-        '%m %d',
-        '%d %B',
-        '%d %b',
-        '%B %d',
-        '%b %d']
+        "%d %m",
+        "%m %d",
+        "%d %B",
+        "%d %b",
+        "%B %d",
+        "%b %d",
+    ]
 
     # Acceptable formats: '23:59:59', '11:59:59pm', '23:59', '11:59pm', '11pm'
-    STD_TIME_FORMATS = [
-        '%H:%M:%S',
-        '%I:%M:%S %p',
-        '%H:%M',
-        '%I:%M %p',
-        '%I %p']
+    STD_TIME_FORMATS = ["%H:%M:%S", "%I:%M:%S %p", "%H:%M", "%I:%M %p", "%I %p"]
 
     # These separators are treated as whitespace
     STD_SEPARATORS = "/-,"
@@ -363,15 +358,13 @@ class DateTimeEditor(BaseCellTextEditor):
         for dtFmt in self.STD_DATE_FORMATS:
             self.allDateTimeFormats.append(dtFmt)
             for timeFmt in self.STD_TIME_FORMATS:
-                self.allDateTimeFormats.append("%s %s" % (dtFmt, timeFmt))
+                self.allDateTimeFormats.append(f"{dtFmt} {timeFmt}")
 
         self.allDateTimeWithoutYearFormats = []
         for dtFmt in self.STD_DATE_WITHOUT_YEAR_FORMATS:
             self.allDateTimeWithoutYearFormats.append(dtFmt)
             for timeFmt in self.STD_TIME_FORMATS:
-                self.allDateTimeWithoutYearFormats.append(
-                    "%s %s" %
-                    (dtFmt, timeFmt))
+                self.allDateTimeWithoutYearFormats.append(f"{dtFmt} {timeFmt}")
 
     def SetValue(self, value):
         "Put a new value into the editor"
@@ -415,11 +408,11 @@ class DateTimeEditor(BaseCellTextEditor):
 
         return None
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class NumericValidator(wx.Validator):
-
     """This validator only accepts numeric keys"""
 
     def __init__(self, acceptableChars="0123456789+-"):
@@ -438,7 +431,8 @@ class NumericValidator(wx.Validator):
             wx.WXK_HOME,
             wx.WXK_END,
             wx.WXK_LEFT,
-            wx.WXK_RIGHT]
+            wx.WXK_RIGHT,
+        ]
         self.acceptableCodes.extend(stdEditKeys)
 
     def Clone(self):
@@ -457,11 +451,11 @@ class NumericValidator(wx.Validator):
 
         wx.Bell()
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class DateEditor(DatePickerCtrl):
-
     """
     This control uses standard datetime.
     wx.DatePickerCtrl works only with wx.DateTime, but they are strange beasts.
@@ -469,7 +463,7 @@ class DateEditor(DatePickerCtrl):
     """
 
     def __init__(self, *args, **kwargs):
-        #kwargs["size"] = (0,0)
+        # kwargs["size"] = (0,0)
         super(DateEditor, self).__init__(*args, **kwargs)
         self.SetValue(None)
 
@@ -489,15 +483,15 @@ class DateEditor(DatePickerCtrl):
         else:
             return None
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 
 
 class TimeEditor(BaseCellTextEditor):
-
     """A text editor that expects and return time values"""
 
     # Acceptable formats: '23:59', '11:59pm', '11pm'
-    STD_TIME_FORMATS = ['%X', '%H:%M', '%I:%M %p', '%I %p']
+    STD_TIME_FORMATS = ["%X", "%H:%M", "%I:%M %p", "%I %p"]
 
     def __init__(self, *args, **kwargs):
         BaseCellTextEditor.__init__(self, *args, **kwargs)
@@ -525,7 +519,8 @@ class TimeEditor(BaseCellTextEditor):
 
         return None
 
-#======================================================================
+
+# ======================================================================
 # Auto complete controls
 
 
@@ -538,8 +533,8 @@ def MakeAutoCompleteTextBox(olv, columnIndex, maxObjectsToConsider=10000):
     # THINK: We could make this time based, i.e. it escapes after 1 second.
     maxObjectsToConsider = min(maxObjectsToConsider, olv.GetItemCount())
     options = set(
-        col.GetStringValue(olv.GetObjectAt(i))
-        for i in range(maxObjectsToConsider))
+        col.GetStringValue(olv.GetObjectAt(i)) for i in range(maxObjectsToConsider)
+    )
     tb = BaseCellTextEditor(olv, columnIndex)
     AutoCompleteHelper(tb, list(options))
     return tb
@@ -553,18 +548,21 @@ def MakeAutoCompleteComboBox(olv, columnIndex, maxObjectsToConsider=10000):
     col = olv.columns[columnIndex]
     maxObjectsToConsider = min(maxObjectsToConsider, olv.GetItemCount())
     options = set(
-        col.GetStringValue(olv.GetObjectAt(i))
-        for i in range(maxObjectsToConsider))
-    cb = wx.ComboBox(olv, choices=list(options),
-                     style=wx.CB_DROPDOWN | wx.CB_SORT | wx.TE_PROCESS_ENTER)
+        col.GetStringValue(olv.GetObjectAt(i)) for i in range(maxObjectsToConsider)
+    )
+    cb = wx.ComboBox(
+        olv,
+        choices=list(options),
+        style=wx.CB_DROPDOWN | wx.CB_SORT | wx.TE_PROCESS_ENTER,
+    )
     AutoCompleteHelper(cb)
     return cb
 
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+
 
 class AutoCompleteHelper(object):
-
     """
     This class operates on a text control or combobox, and automatically completes the
     text typed by the user from a list of entries in a given list.
@@ -585,9 +583,7 @@ class AutoCompleteHelper(object):
         evt.Skip()
         # After the SetValue() we want to ignore this event. If we get this event
         # and the value hasn't been modified, we know it was a SetValue() call.
-        if hasattr(
-                self.control,
-                "IsModified") and not self.control.IsModified():
+        if hasattr(self.control, "IsModified") and not self.control.IsModified():
             return
 
         # If the text has changed more than the user just typing one letter,
