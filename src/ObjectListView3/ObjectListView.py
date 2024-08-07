@@ -606,7 +606,7 @@ class ObjectListView(wx.ListCtrl):
             self._SortItemsNow()
         finally:
             self.Thaw()
-           
+
     def AddNamedImages(self, name, smallImage=None, normalImage=None):
         """
         Add the given images (:class:`wx.Bitmap <wx:Bitmap>`) to the list of available images. Return the index of the image.
@@ -2909,8 +2909,7 @@ class GroupListView(FastObjectListView):
         Replace the old object with a new one.
         """
         self.groups = None
-        FastObjectListView.ReplaceObject(
-            self, modelOldObject, modelObject)
+        FastObjectListView.ReplaceObject(self, modelOldObject, modelObject)
 
     def CreateCheckStateColumn(self, columnIndex=0):
         """
