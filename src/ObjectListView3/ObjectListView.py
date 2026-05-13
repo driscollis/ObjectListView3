@@ -250,6 +250,8 @@ class ObjectListView(wx.ListCtrl):
         self.normalImageList = None
         self.cellEditor = None
         self.cellBeingEdited = None
+        self._clickCellEditToken = 0
+        self._suppressInitialEditorKillFocus = False
         self.selectionBeforeCellEdit = []
         self.checkStateColumn = None
         self.handleStandardKeys = True
@@ -276,11 +278,12 @@ class ObjectListView(wx.ListCtrl):
         if self.sortable:
             self.EnableSorting()
 
-        # NOTE: On Windows, ListCtrl's don't trigger EVT_LEFT_UP :(
+        # NOTE: On Windows, ListCtrl's don't reliably trigger EVT_LEFT_UP,
+        # so single-click editing must listen for EVT_LEFT_DOWN instead.
 
         self.Bind(wx.EVT_CHAR, self._HandleChar)
         self.Bind(wx.EVT_LEFT_DOWN, self._HandleLeftDown)
-        self.Bind(wx.EVT_LEFT_UP, self._HandleLeftClickOrDoubleClick)
+        self.Bind(wx.EVT_LEFT_DOWN, self._HandleLeftClickOrDoubleClick)
         self.Bind(wx.EVT_LEFT_DCLICK, self._HandleLeftClickOrDoubleClick)
         self.Bind(wx.EVT_LIST_COL_BEGIN_DRAG, self._HandleColumnBeginDrag)
         self.Bind(wx.EVT_LIST_COL_END_DRAG, self._HandleColumnEndDrag)
@@ -1743,11 +1746,14 @@ class ObjectListView(wx.ListCtrl):
         else:
             if evt.m_altDown or evt.m_controlDown or evt.m_shiftDown:
                 return
-        if self.cellEditMode == self.CELLEDIT_NONE:
-            return
-        if evt.LeftUp() and self.cellEditMode == self.CELLEDIT_DOUBLECLICK:
-            return
-        if evt.LeftDClick() and self.cellEditMode == self.CELLEDIT_SINGLECLICK:
+        eventType = evt.GetEventType()
+        if self.cellEditMode == self.CELLEDIT_SINGLECLICK:
+            if eventType != wx.wxEVT_LEFT_DOWN:
+                return
+        elif self.cellEditMode == self.CELLEDIT_DOUBLECLICK:
+            if eventType != wx.wxEVT_LEFT_DCLICK:
+                return
+        else:
             return
 
         # Which item did the user click?
@@ -1755,10 +1761,53 @@ class ObjectListView(wx.ListCtrl):
         if (flags & wx.LIST_HITTEST_ONITEM) == 0 or subItemIndex == -1:
             return
 
+        # Clicking on a checkbox image should toggle the checkbox, not start editing.
+        if (flags & wx.LIST_HITTEST_ONITEMICON) != 0 and self.columns[
+            subItemIndex
+        ].HasCheckState():
+            return
+
         # A single click on column 0 doesn't start an edit
         if subItemIndex == 0 and self.cellEditMode == self.CELLEDIT_SINGLECLICK:
             return
 
+        if self.cellEditMode in (
+            self.CELLEDIT_SINGLECLICK,
+            self.CELLEDIT_DOUBLECLICK,
+        ):
+            self._QueueCellEditStartFromMouseClick(rowIndex, subItemIndex)
+            return
+
+        self._PossibleStartCellEdit(rowIndex, subItemIndex)
+
+    def _QueueCellEditStartFromMouseClick(self, rowIndex, subItemIndex):
+        """
+        Defer click-started editing until the left mouse button is released.
+        """
+        self._clickCellEditToken += 1
+        token = self._clickCellEditToken
+        wx.CallAfter(
+            self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex
+        )
+
+    def _TryStartCellEditAfterMouseRelease(self, token, rowIndex, subItemIndex):
+        """
+        Start the queued edit once the click gesture has completed.
+        """
+        if token != self._clickCellEditToken:
+            return
+
+        if wx.GetMouseState().LeftIsDown():
+            wx.CallLater(
+                10,
+                self._TryStartCellEditAfterMouseRelease,
+                token,
+                rowIndex,
+                subItemIndex,
+            )
+            return
+
+        self._suppressInitialEditorKillFocus = True
         self._PossibleStartCellEdit(rowIndex, subItemIndex)
 
     def _HandleMouseWheel(self, evt):
@@ -2054,10 +2103,10 @@ class ObjectListView(wx.ListCtrl):
         """
         Start an edit operation on the given cell after performing some sanity checks
         """
-        if 0 > rowIndex >= self.GetItemCount():
+        if rowIndex < 0 or rowIndex >= self.GetItemCount():
             return
 
-        if 0 > subItemIndex >= self.GetColumnCount():
+        if subItemIndex < 0 or subItemIndex >= self.GetColumnCount():
             return
 
         if self.cellEditMode == self.CELLEDIT_NONE:
@@ -2152,6 +2201,12 @@ class ObjectListView(wx.ListCtrl):
 
         self.cellEditor.Show()
         self.cellEditor.Raise()
+        # Set focus after showing so click-started editors keep focus after mouse-up.
+        wx.CallAfter(self._FocusCellEditor)
+
+    def _FocusCellEditor(self):
+        if self.cellEditor:
+            self.cellEditor.SetFocus()
 
     def _ConfigureCellEditor(self, editor, bounds, rowIndex, subItemIndex):
         """
@@ -2224,6 +2279,10 @@ class ObjectListView(wx.ListCtrl):
 
     def _Editor_KillFocus(self, evt):
         evt.Skip()
+
+        if self._suppressInitialEditorKillFocus:
+            self._suppressInitialEditorKillFocus = False
+            return
 
         # Some control trigger FocusLost events even when they still have focus
         focusWindow = wx.Window.FindFocus()
@@ -3731,13 +3790,13 @@ class ColumnDefn(object):
             self.SetFixedWidth(fixedWidth)
 
         if autoCompleteCellEditor:
-            self.cellEditorCreator = (
-                lambda olv, row, col: CellEditor.MakeAutoCompleteTextBox(olv, col)
+            self.cellEditorCreator = lambda olv, row, col: (
+                CellEditor.MakeAutoCompleteTextBox(olv, col)
             )
 
         if autoCompleteComboBoxCellEditor:
-            self.cellEditorCreator = (
-                lambda olv, row, col: CellEditor.MakeAutoCompleteComboBox(olv, col)
+            self.cellEditorCreator = lambda olv, row, col: (
+                CellEditor.MakeAutoCompleteComboBox(olv, col)
             )
 
         self.checkStateGetter = checkStateGetter
