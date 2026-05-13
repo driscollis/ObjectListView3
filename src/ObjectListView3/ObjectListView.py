@@ -3741,13 +3741,13 @@ class ColumnDefn(object):
             self.SetFixedWidth(fixedWidth)
 
         if autoCompleteCellEditor:
-            self.cellEditorCreator = (
-                lambda olv, row, col: CellEditor.MakeAutoCompleteTextBox(olv, col)
+            self.cellEditorCreator = lambda olv, row, col: (
+                CellEditor.MakeAutoCompleteTextBox(olv, col)
             )
 
         if autoCompleteComboBoxCellEditor:
-            self.cellEditorCreator = (
-                lambda olv, row, col: CellEditor.MakeAutoCompleteComboBox(olv, col)
+            self.cellEditorCreator = lambda olv, row, col: (
+                CellEditor.MakeAutoCompleteComboBox(olv, col)
             )
 
         self.checkStateGetter = checkStateGetter
