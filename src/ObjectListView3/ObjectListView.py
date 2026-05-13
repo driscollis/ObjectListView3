@@ -250,6 +250,8 @@ class ObjectListView(wx.ListCtrl):
         self.normalImageList = None
         self.cellEditor = None
         self.cellBeingEdited = None
+        self._clickCellEditToken = 0
+        self._suppressInitialEditorKillFocus = False
         self.selectionBeforeCellEdit = []
         self.checkStateColumn = None
         self.handleStandardKeys = True
@@ -1769,6 +1771,37 @@ class ObjectListView(wx.ListCtrl):
         if subItemIndex == 0 and self.cellEditMode == self.CELLEDIT_SINGLECLICK:
             return
 
+        if self.cellEditMode in (
+            self.CELLEDIT_SINGLECLICK,
+            self.CELLEDIT_DOUBLECLICK,
+        ):
+            self._QueueCellEditStartFromMouseClick(rowIndex, subItemIndex)
+            return
+
+        self._PossibleStartCellEdit(rowIndex, subItemIndex)
+
+    def _QueueCellEditStartFromMouseClick(self, rowIndex, subItemIndex):
+        """
+        Defer click-started editing until the left mouse button is released.
+        """
+        self._clickCellEditToken += 1
+        token = self._clickCellEditToken
+        wx.CallAfter(self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex)
+
+    def _TryStartCellEditAfterMouseRelease(self, token, rowIndex, subItemIndex):
+        """
+        Start the queued edit once the click gesture has completed.
+        """
+        if token != self._clickCellEditToken:
+            return
+
+        if wx.GetMouseState().LeftIsDown():
+            wx.CallLater(
+                10, self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex
+            )
+            return
+
+        self._suppressInitialEditorKillFocus = True
         self._PossibleStartCellEdit(rowIndex, subItemIndex)
 
     def _HandleMouseWheel(self, evt):
@@ -2162,6 +2195,12 @@ class ObjectListView(wx.ListCtrl):
 
         self.cellEditor.Show()
         self.cellEditor.Raise()
+        # Set focus after showing so click-started editors keep focus after mouse-up.
+        wx.CallAfter(self._FocusCellEditor)
+
+    def _FocusCellEditor(self):
+        if self.cellEditor:
+            self.cellEditor.SetFocus()
 
     def _ConfigureCellEditor(self, editor, bounds, rowIndex, subItemIndex):
         """
@@ -2234,6 +2273,10 @@ class ObjectListView(wx.ListCtrl):
 
     def _Editor_KillFocus(self, evt):
         evt.Skip()
+
+        if self._suppressInitialEditorKillFocus:
+            self._suppressInitialEditorKillFocus = False
+            return
 
         # Some control trigger FocusLost events even when they still have focus
         focusWindow = wx.Window.FindFocus()

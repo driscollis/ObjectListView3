@@ -336,10 +336,10 @@ class TestObjectListView(wtc.WidgetTestCase):
         evt = FakeMouseEvent(wx.wxEVT_LEFT_DOWN)
 
         with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
-            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+            with mock.patch.object(self.objectListView, '_QueueCellEditStartFromMouseClick') as queueEdit:
                 self.objectListView._HandleLeftClickOrDoubleClick(evt)
 
-        startCellEdit.assert_called_once_with(1, 1)
+        queueEdit.assert_called_once_with(1, 1)
 
     def testCellEditModeSingleClickDoesNotEditPrimaryColumn(self):
         self.objectListView.cellEditMode = ObjectListView.CELLEDIT_SINGLECLICK
@@ -355,14 +355,40 @@ class TestObjectListView(wtc.WidgetTestCase):
         self.objectListView.cellEditMode = ObjectListView.CELLEDIT_DOUBLECLICK
 
         with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
-            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+            with mock.patch.object(self.objectListView, '_QueueCellEditStartFromMouseClick') as queueEdit:
                 self.objectListView._HandleLeftClickOrDoubleClick(
                     FakeMouseEvent(wx.wxEVT_LEFT_DOWN))
-                startCellEdit.assert_not_called()
+                queueEdit.assert_not_called()
                 self.objectListView._HandleLeftClickOrDoubleClick(
                     FakeMouseEvent(wx.wxEVT_LEFT_DCLICK))
 
-        startCellEdit.assert_called_once_with(1, 1)
+        queueEdit.assert_called_once_with(1, 1)
+
+    def testQueuedCellEditStartsWhenMouseReleased(self):
+        class _MouseState:
+
+            def LeftIsDown(self):
+                return False
+
+        with mock.patch('ObjectListView3.ObjectListView.wx.GetMouseState', return_value=_MouseState()):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._clickCellEditToken = 1
+                self.objectListView._suppressInitialEditorKillFocus = False
+                self.objectListView._TryStartCellEditAfterMouseRelease(1, 2, 3)
+
+        startCellEdit.assert_called_once_with(2, 3)
+        self.assertTrue(self.objectListView._suppressInitialEditorKillFocus)
+
+    def testEditorKillFocusIgnoresInitialTransientFocusLoss(self):
+        evt = mock.Mock()
+        self.objectListView._suppressInitialEditorKillFocus = True
+
+        with mock.patch.object(self.objectListView, '_PossibleFinishCellEdit') as finishCellEdit:
+            self.objectListView._Editor_KillFocus(evt)
+
+        evt.Skip.assert_called_once_with()
+        finishCellEdit.assert_not_called()
+        self.assertFalse(self.objectListView._suppressInitialEditorKillFocus)
 
     def testCellEditModeF2OnlyIgnoresMouseClicks(self):
         self.objectListView.cellEditMode = ObjectListView.CELLEDIT_F2ONLY
