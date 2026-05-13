@@ -1,5 +1,6 @@
 import wtc
 import unittest
+from unittest import mock
 import wx
 print(wx.VERSION_STRING)
 import datetime
@@ -40,6 +41,60 @@ def loadOLV(olv):
     """Load the OLV with columns and data."""
     olv.SetColumns(personColumns)
     olv.SetObjects(persons)
+
+
+class FakeMouseEvent:
+
+    def __init__(
+        self,
+        eventType,
+        position=None,
+        altDown=False,
+        controlDown=False,
+        shiftDown=False,
+    ):
+        self._eventType = eventType
+        self._position = position or wx.Point(0, 0)
+        self.altDown = altDown
+        self.controlDown = controlDown
+        self.shiftDown = shiftDown
+        self.m_altDown = altDown
+        self.m_controlDown = controlDown
+        self.m_shiftDown = shiftDown
+        self.skipped = False
+
+    def GetEventType(self):
+        return self._eventType
+
+    def GetPosition(self):
+        return self._position
+
+    def Skip(self):
+        self.skipped = True
+
+
+class FakeKeyEvent:
+
+    def __init__(self, keyCode, shiftDown=False):
+        self._keyCode = keyCode
+        self.KeyCode = keyCode
+        self._shiftDown = shiftDown
+        self.skipped = False
+        self.UnicodeKey = 0
+
+    def GetKeyCode(self):
+        return self._keyCode
+
+    def GetModifiers(self):
+        if self._shiftDown:
+            return wx.MOD_SHIFT
+        return 0
+
+    def ShiftDown(self):
+        return self._shiftDown
+
+    def Skip(self):
+        self.skipped = True
 
 
 class TestObjectListView(wtc.WidgetTestCase):
@@ -194,6 +249,7 @@ class TestObjectListView(wtc.WidgetTestCase):
                 rowIndex,
                 primaryColumnIndex).GetText(),
             originalName)
+
         self.objectListView.DeselectAll()
         self.objectListView.SetItemState(
             rowIndex,
@@ -202,13 +258,12 @@ class TestObjectListView(wtc.WidgetTestCase):
 
         # Fake an F2, change the value of the edit, and then fake a Return to
         # commit the change
-        evt = wx.KeyEvent(wx.EVT_CHAR.evtType[0])
-        evt.m_keyCode = wx.WXK_F2
+        evt = FakeKeyEvent(wx.WXK_F2)
         self.objectListView._HandleChar(evt)
         self.objectListView.StartCellEdit(rowIndex, primaryColumnIndex)
         self.objectListView.cellEditor.SetValue("new name for X")
         self.objectListView.FinishCellEdit()
-        evt.m_keyCode = wx.WXK_RETURN
+        evt = FakeKeyEvent(wx.WXK_RETURN)
         self.objectListView._HandleChar(evt)
         self.assertEqual(
             self.objectListView.GetItem(
@@ -217,18 +272,109 @@ class TestObjectListView(wtc.WidgetTestCase):
             "new name for X")
 
         # Put the original value back
-        evt.m_keyCode = wx.WXK_F2
+        evt = FakeKeyEvent(wx.WXK_F2)
         self.objectListView._HandleChar(evt)
         self.objectListView.StartCellEdit(rowIndex, primaryColumnIndex)
         self.objectListView.cellEditor.SetValue(originalName)
         self.objectListView.FinishCellEdit()
-        evt.m_keyCode = wx.WXK_RETURN
+        evt = FakeKeyEvent(wx.WXK_RETURN)
         self.objectListView._HandleChar(evt)
         self.assertEqual(
             self.objectListView.GetItem(
                 rowIndex,
                 primaryColumnIndex).GetText(),
             originalName)
+
+    def testPossibleStartCellEditRejectsInvalidIndexes(self):
+        with mock.patch.object(self.objectListView, 'StartCellEdit') as startCellEdit:
+            self.objectListView._PossibleStartCellEdit(-1, 0)
+            self.objectListView._PossibleStartCellEdit(
+                self.objectListView.GetItemCount(),
+                0)
+            self.objectListView._PossibleStartCellEdit(0, -1)
+            self.objectListView._PossibleStartCellEdit(
+                0,
+                self.objectListView.GetColumnCount())
+
+        startCellEdit.assert_not_called()
+
+    def testF2StartsEditingFocusedPrimaryCell(self):
+        rowIndex = 1
+        primaryColumnIndex = self.objectListView.GetPrimaryColumnIndex()
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_F2ONLY
+
+        evt = FakeKeyEvent(wx.WXK_F2)
+
+        with mock.patch.object(self.objectListView, 'GetFocusedRow', return_value=rowIndex):
+            with mock.patch.object(self.objectListView, 'StartCellEdit') as startCellEdit:
+                self.objectListView._HandleChar(evt)
+
+        startCellEdit.assert_called_once_with(rowIndex, primaryColumnIndex)
+
+    def testF2WithoutFocusedRowDoesNotStartEditing(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_F2ONLY
+        evt = FakeKeyEvent(wx.WXK_F2)
+
+        with mock.patch.object(self.objectListView, 'GetFocusedRow', return_value=-1):
+            with mock.patch.object(self.objectListView, 'StartCellEdit') as startCellEdit:
+                self.objectListView._HandleChar(evt)
+
+        startCellEdit.assert_not_called()
+
+    def testCellEditModeNoneIgnoresMouseClicks(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_NONE
+        evt = FakeMouseEvent(wx.wxEVT_LEFT_DOWN)
+
+        with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._HandleLeftClickOrDoubleClick(evt)
+
+        startCellEdit.assert_not_called()
+
+    def testCellEditModeSingleClickUsesLeftDown(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_SINGLECLICK
+        evt = FakeMouseEvent(wx.wxEVT_LEFT_DOWN)
+
+        with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._HandleLeftClickOrDoubleClick(evt)
+
+        startCellEdit.assert_called_once_with(1, 1)
+
+    def testCellEditModeSingleClickDoesNotEditPrimaryColumn(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_SINGLECLICK
+        evt = FakeMouseEvent(wx.wxEVT_LEFT_DOWN)
+
+        with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 0)):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._HandleLeftClickOrDoubleClick(evt)
+
+        startCellEdit.assert_not_called()
+
+    def testCellEditModeDoubleClickRequiresDoubleClick(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_DOUBLECLICK
+
+        with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._HandleLeftClickOrDoubleClick(
+                    FakeMouseEvent(wx.wxEVT_LEFT_DOWN))
+                startCellEdit.assert_not_called()
+                self.objectListView._HandleLeftClickOrDoubleClick(
+                    FakeMouseEvent(wx.wxEVT_LEFT_DCLICK))
+
+        startCellEdit.assert_called_once_with(1, 1)
+
+    def testCellEditModeF2OnlyIgnoresMouseClicks(self):
+        self.objectListView.cellEditMode = ObjectListView.CELLEDIT_F2ONLY
+
+        with mock.patch.object(self.objectListView, 'HitTestSubItem', return_value=(1, wx.LIST_HITTEST_ONITEMLABEL, 1)):
+            with mock.patch.object(self.objectListView, '_PossibleStartCellEdit') as startCellEdit:
+                self.objectListView._HandleLeftClickOrDoubleClick(
+                    FakeMouseEvent(wx.wxEVT_LEFT_DOWN))
+                self.objectListView._HandleLeftClickOrDoubleClick(
+                    FakeMouseEvent(wx.wxEVT_LEFT_DCLICK))
+
+        startCellEdit.assert_not_called()
 
     def testLackOfCheckboxes(self):
         self.objectListView.InstallCheckStateColumn(None)

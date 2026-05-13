@@ -276,11 +276,12 @@ class ObjectListView(wx.ListCtrl):
         if self.sortable:
             self.EnableSorting()
 
-        # NOTE: On Windows, ListCtrl's don't trigger EVT_LEFT_UP :(
+        # NOTE: On Windows, ListCtrl's don't reliably trigger EVT_LEFT_UP,
+        # so single-click editing must listen for EVT_LEFT_DOWN instead.
 
         self.Bind(wx.EVT_CHAR, self._HandleChar)
         self.Bind(wx.EVT_LEFT_DOWN, self._HandleLeftDown)
-        self.Bind(wx.EVT_LEFT_UP, self._HandleLeftClickOrDoubleClick)
+        self.Bind(wx.EVT_LEFT_DOWN, self._HandleLeftClickOrDoubleClick)
         self.Bind(wx.EVT_LEFT_DCLICK, self._HandleLeftClickOrDoubleClick)
         self.Bind(wx.EVT_LIST_COL_BEGIN_DRAG, self._HandleColumnBeginDrag)
         self.Bind(wx.EVT_LIST_COL_END_DRAG, self._HandleColumnEndDrag)
@@ -1743,16 +1744,25 @@ class ObjectListView(wx.ListCtrl):
         else:
             if evt.m_altDown or evt.m_controlDown or evt.m_shiftDown:
                 return
-        if self.cellEditMode == self.CELLEDIT_NONE:
-            return
-        if evt.LeftUp() and self.cellEditMode == self.CELLEDIT_DOUBLECLICK:
-            return
-        if evt.LeftDClick() and self.cellEditMode == self.CELLEDIT_SINGLECLICK:
+        eventType = evt.GetEventType()
+        if self.cellEditMode == self.CELLEDIT_SINGLECLICK:
+            if eventType != wx.wxEVT_LEFT_DOWN:
+                return
+        elif self.cellEditMode == self.CELLEDIT_DOUBLECLICK:
+            if eventType != wx.wxEVT_LEFT_DCLICK:
+                return
+        else:
             return
 
         # Which item did the user click?
         (rowIndex, flags, subItemIndex) = self.HitTestSubItem(evt.GetPosition())
         if (flags & wx.LIST_HITTEST_ONITEM) == 0 or subItemIndex == -1:
+            return
+
+        # Clicking on a checkbox image should toggle the checkbox, not start editing.
+        if (flags & wx.LIST_HITTEST_ONITEMICON) != 0 and self.columns[
+            subItemIndex
+        ].HasCheckState():
             return
 
         # A single click on column 0 doesn't start an edit
@@ -2054,10 +2064,10 @@ class ObjectListView(wx.ListCtrl):
         """
         Start an edit operation on the given cell after performing some sanity checks
         """
-        if 0 > rowIndex >= self.GetItemCount():
+        if rowIndex < 0 or rowIndex >= self.GetItemCount():
             return
 
-        if 0 > subItemIndex >= self.GetColumnCount():
+        if subItemIndex < 0 or subItemIndex >= self.GetColumnCount():
             return
 
         if self.cellEditMode == self.CELLEDIT_NONE:
