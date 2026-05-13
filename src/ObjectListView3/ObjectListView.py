@@ -1786,7 +1786,9 @@ class ObjectListView(wx.ListCtrl):
         """
         self._clickCellEditToken += 1
         token = self._clickCellEditToken
-        wx.CallAfter(self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex)
+        wx.CallAfter(
+            self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex
+        )
 
     def _TryStartCellEditAfterMouseRelease(self, token, rowIndex, subItemIndex):
         """
@@ -1797,7 +1799,11 @@ class ObjectListView(wx.ListCtrl):
 
         if wx.GetMouseState().LeftIsDown():
             wx.CallLater(
-                10, self._TryStartCellEditAfterMouseRelease, token, rowIndex, subItemIndex
+                10,
+                self._TryStartCellEditAfterMouseRelease,
+                token,
+                rowIndex,
+                subItemIndex,
             )
             return
 
